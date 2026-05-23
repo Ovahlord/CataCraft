@@ -18,23 +18,26 @@ public ref struct ClientPlayerLogin
     {
         ClientPacketReader reader = new(payload);
 
-        PlayerGUID[2] = reader.ReadBit();
-        PlayerGUID[3] = reader.ReadBit();
-        PlayerGUID[0] = reader.ReadBit();
-        PlayerGUID[6] = reader.ReadBit();
-        PlayerGUID[4] = reader.ReadBit();
-        PlayerGUID[5] = reader.ReadBit();
-        PlayerGUID[1] = reader.ReadBit();
-        PlayerGUID[7] = reader.ReadBit();
+        WowGuid playerGUID = new();
+        playerGUID[2] = reader.ReadBit();
+        playerGUID[3] = reader.ReadBit();
+        playerGUID[0] = reader.ReadBit();
+        playerGUID[6] = reader.ReadBit();
+        playerGUID[4] = reader.ReadBit();
+        playerGUID[5] = reader.ReadBit();
+        playerGUID[1] = reader.ReadBit();
+        playerGUID[7] = reader.ReadBit();
 
-        reader.ReadByteSeq(PlayerGUID, 2);
-        reader.ReadByteSeq(PlayerGUID, 7);
-        reader.ReadByteSeq(PlayerGUID, 0);
-        reader.ReadByteSeq(PlayerGUID, 3);
-        reader.ReadByteSeq(PlayerGUID, 5);
-        reader.ReadByteSeq(PlayerGUID, 6);
-        reader.ReadByteSeq(PlayerGUID, 1);
-        reader.ReadByteSeq(PlayerGUID, 4);
+        reader.ReadByteSeq(playerGUID, 2);
+        reader.ReadByteSeq(playerGUID, 7);
+        reader.ReadByteSeq(playerGUID, 0);
+        reader.ReadByteSeq(playerGUID, 3);
+        reader.ReadByteSeq(playerGUID, 5);
+        reader.ReadByteSeq(playerGUID, 6);
+        reader.ReadByteSeq(playerGUID, 1);
+        reader.ReadByteSeq(playerGUID, 4);
+
+        PlayerGUID = playerGUID;
     }
 
     public static ValueTask HandlePacket(ReadOnlySequence<byte> payload, GameSession session)

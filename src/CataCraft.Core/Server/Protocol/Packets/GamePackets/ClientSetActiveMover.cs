@@ -13,24 +13,27 @@ public ref struct ClientSetActiveMover
     public ClientSetActiveMover(ReadOnlySequence<byte> payload)
     {
         ClientPacketReader reader = new(payload);
-        MoverGUID = new();
-        MoverGUID[7] = reader.ReadBit();
-        MoverGUID[2] = reader.ReadBit();
-        MoverGUID[1] = reader.ReadBit();
-        MoverGUID[0] = reader.ReadBit();
-        MoverGUID[4] = reader.ReadBit();
-        MoverGUID[5] = reader.ReadBit();
-        MoverGUID[6] = reader.ReadBit();
-        MoverGUID[3] = reader.ReadBit();
 
-        reader.ReadByteSeq(MoverGUID, 3);
-        reader.ReadByteSeq(MoverGUID, 2);
-        reader.ReadByteSeq(MoverGUID, 4);
-        reader.ReadByteSeq(MoverGUID, 0);
-        reader.ReadByteSeq(MoverGUID, 5);
-        reader.ReadByteSeq(MoverGUID, 1);
-        reader.ReadByteSeq(MoverGUID, 6);
-        reader.ReadByteSeq(MoverGUID, 7);
+        WowGuid moverGuid = MoverGUID;
+        moverGuid[7] = reader.ReadBit();
+        moverGuid[2] = reader.ReadBit();
+        moverGuid[1] = reader.ReadBit();
+        moverGuid[0] = reader.ReadBit();
+        moverGuid[4] = reader.ReadBit();
+        moverGuid[5] = reader.ReadBit();
+        moverGuid[6] = reader.ReadBit();
+        moverGuid[3] = reader.ReadBit();
+
+        reader.ReadByteSeq(moverGuid, 3);
+        reader.ReadByteSeq(moverGuid, 2);
+        reader.ReadByteSeq(moverGuid, 4);
+        reader.ReadByteSeq(moverGuid, 0);
+        reader.ReadByteSeq(moverGuid, 5);
+        reader.ReadByteSeq(moverGuid, 1);
+        reader.ReadByteSeq(moverGuid, 6);
+        reader.ReadByteSeq(moverGuid, 7);
+
+        MoverGUID = moverGuid;
     }
 
     public static ValueTask HandlePacket(ReadOnlySequence<byte> payload, GameSession session)

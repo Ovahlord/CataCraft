@@ -21,7 +21,7 @@ namespace CataCraft.Core.Game.World.Entities.Object
         Seer = Player | Unit | DynamicObject
     }
 
-    public class WowGuid
+    public struct WowGuid : IEquatable<WowGuid>
     {
         public static implicit operator ulong(WowGuid guid)
         {
@@ -44,8 +44,18 @@ namespace CataCraft.Core.Game.World.Entities.Object
         public uint Counter => (uint)(RawValue & 0xFFFFFFFF);
         public uint Entry => (uint)(RawValue >> 32 & 0xFFFFF);
         public bool IsEmpty => RawValue == 0;
+
         public bool IsPlayer => !IsEmpty && GuidType == WowGuidType.Player;
         public bool IsUnit => GuidType == WowGuidType.Unit;
+        public bool IsItem => GuidType == WowGuidType.Item;
+        public bool IsContainer => GuidType == WowGuidType.Container;
+        public bool IsVehicle => GuidType == WowGuidType.Vehicle;
+        public bool IsPet =>  GuidType == WowGuidType.Pet;
+        public bool IsGameObject => GuidType == WowGuidType.GameObject;
+        public bool IsDynamicObject => GuidType == WowGuidType.DynamicObject;
+        public bool IsCorpse => GuidType == WowGuidType.Corpse;
+        public bool IsAreaTrigger => GuidType == WowGuidType.AreaTrigger;
+
         public WowGuidType GuidType
         {
             get
@@ -85,6 +95,26 @@ namespace CataCraft.Core.Game.World.Entities.Object
             }
         }
 
+        public bool HasEntry
+        {
+            get
+            {
+                switch (GuidType)
+                {
+                    case WowGuidType.Item:
+                    case WowGuidType.Player:
+                    case WowGuidType.DynamicObject:
+                    case WowGuidType.Corpse:
+                    case WowGuidType.Mo_Transport:
+                    case WowGuidType.Instance:
+                    case WowGuidType.Group:
+                        return false;
+                    default:
+                        return true;
+                }
+            }
+        }
+
         public WowGuid()
         {
             RawValue = 0;
@@ -103,19 +133,6 @@ namespace CataCraft.Core.Game.World.Entities.Object
         public WowGuid(WowGuidType high, uint counter)
         {
             RawValue = counter != 0 ? counter | (ulong)high << (high == WowGuidType.Corpse || high == WowGuidType.AreaTrigger ? 48 : 52) : 0;
-        }
-
-        public override bool Equals(object? obj)
-        {
-            if (obj is WowGuid other)
-                return RawValue == other.RawValue;
-
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            return RawValue.GetHashCode();
         }
 
         public override string ToString()
@@ -143,22 +160,7 @@ namespace CataCraft.Core.Game.World.Entities.Object
             }
         }
 
-        private bool HasEntry()
-        {
-            switch (GuidType)
-            {
-                case WowGuidType.Item:
-                case WowGuidType.Player:
-                case WowGuidType.DynamicObject:
-                case WowGuidType.Corpse:
-                case WowGuidType.Mo_Transport:
-                case WowGuidType.Instance:
-                case WowGuidType.Group:
-                    return false;
-                default:
-                    return true;
-            }
-        }
+        public bool Equals(WowGuid other) => RawValue == other.RawValue;
     }
 
     public sealed class PackedGuid
