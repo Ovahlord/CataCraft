@@ -2,64 +2,98 @@
 
 using CataCraft.Core.Enums;
 using CataCraft.Core.Game.World.Entities.Object;
+using CataCraft.Database.Realm.Model;
 
 namespace CataCraft.Core.Game.World.Entities.Player;
 
 public class Player : Unit.Unit
 {
+    #region DataField accessors
+
+    public byte SkinId
+    {
+        get => DataFields.GetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 0);
+        set => DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 0, value);
+    }
+
+    public byte FaceId
+    {
+        get => DataFields.GetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 1);
+        set => DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 1, value);
+    }
+
+    public byte HairStyleId
+    {
+        get => DataFields.GetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 2);
+        set => DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 2, value);
+    }
+
+    public byte HairColorId
+    {
+        get => DataFields.GetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 3);
+        set => DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 3, value);
+    }
+
+    public byte FacialHairStyleId
+    {
+        get => DataFields.GetUInt8Value(EPlayerFields.PLAYER_BYTES_2, 0, 0);
+        set => DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES_2, 0, 0, value);
+    }
+
+    public UnitSex PlayerSex
+    {
+        get => (UnitSex)DataFields.GetUInt8Value(EPlayerFields.PLAYER_BYTES_3, 0, 0);
+        set => DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES_3, 0, 0, (byte)value);
+    }
+
+    public byte MaxLevel
+    {
+        get => (byte)DataFields.GetUInt32Value(EPlayerFields.PLAYER_FIELD_MAX_LEVEL, 0);
+        set => DataFields.SetUInt32Value(EPlayerFields.PLAYER_FIELD_MAX_LEVEL, 0, value);
+    }
+
+    #endregion // DataField accessors
+
     public Player(WowGuid guid) : base(guid)
     {
-        MaxHealth = 100;
-        Health = 100;
-        BaseHealth = 100;
-        BaseMana = 0;
-        HoverHeight = 1f;
+    }
 
-        DataFields.SetUInt8Value(EUnitFields.UNIT_FIELD_BYTES_0, 0, 0, 4);
-        DataFields.SetUInt8Value(EUnitFields.UNIT_FIELD_BYTES_0, 0, 1, 11);
-        DataFields.SetUInt8Value(EUnitFields.UNIT_FIELD_BYTES_0, 0, 2, 0);
-        DataFields.SetUInt8Value(EUnitFields.UNIT_FIELD_BYTES_0, 0, 3, 0);
+    public static Player? CreatePlayerFromData(Character characterData)
+    {
+        if (characterData.Stats == null)
+            return null;
 
-        DataFields.SetUInt32Value(EUnitFields.UNIT_FIELD_POWER1, 0, 3844);
-        DataFields.SetUInt32Value(EUnitFields.UNIT_FIELD_POWER3, 0, 100);
+        Player player = new(new WowGuid(WowGuidType.Player, (uint)characterData.Id))
+        {
+            Sex = (UnitSex)characterData.SexId,
+            PlayerSex = (UnitSex)characterData.SexId,
+            FaceId = characterData.FaceId,
+            SkinId = characterData.SkinId,
+            HairStyleId = characterData.HairStyleId,
+            HairColorId = characterData.HairColorId,
+            FacialHairStyleId = characterData.FacialHairStyleId,
+            Level = characterData.Stats.ExperienceLevel,
+            MaxLevel = 85,
+            Race = (ChrRace)characterData.RaceId,
+            Class = (UnitClass)characterData.ClassId,
 
-        DataFields.SetUInt32Value(EUnitFields.UNIT_FIELD_MAXPOWER1, 0, 3844);
-        DataFields.SetUInt32Value(EUnitFields.UNIT_FIELD_MAXPOWER2, 0, 1000);
-        DataFields.SetUInt32Value(EUnitFields.UNIT_FIELD_MAXPOWER3, 0, 100);
-        DataFields.SetUInt32Value(EUnitFields.UNIT_FIELD_MAXPOWER4, 0, 100);
+            Flags = UnitFlags.PlayerControlled,
+            Flags2 = UnitFlags2.RegeneratePower,
 
-        SetBaseAttackTime(2000);
-        DataFields.SetUInt32Value(EUnitFields.UNIT_FIELD_FACTIONTEMPLATE, 0, 4);
-        DataFields.SetUInt32Value(EUnitFields.UNIT_FIELD_LEVEL, 0, 1);
-        DataFields.SetUInt32Value(EUnitFields.UNIT_FIELD_DISPLAYID, 0, 53);
-        DataFields.SetUInt32Value(EUnitFields.UNIT_FIELD_NATIVEDISPLAYID, 0, 53);
-        DataFields.SetFloatValue(EUnitFields.UNIT_FIELD_COMBATREACH, 0, 1.5f);
-        DataFields.SetFloatValue(EUnitFields.UNIT_FIELD_BOUNDINGRADIUS, 0, 0.356f);
-        DataFields.SetInt32Value(EUnitFields.UNIT_FIELD_STAT4, 0, 32);
-        DataFields.SetInt32Value(EUnitFields.UNIT_FIELD_FLAGS, 0, 0x8);
-        //DataFields.SetInt32Value(EPlayerFields.PLAYER_FLAGS, 0, 0);
+            BaseHealth = 100,
+            BaseMana = 0,
+            MaxHealth = 100,
+            Health = 100,
 
-        DataFields.SetInt32Value(EPlayerFields.PLAYER_XP, 0, 123);
-        DataFields.SetInt32Value(EPlayerFields.PLAYER_NEXT_LEVEL_XP, 0, 100000);
+            BoundingRadius = 1f,
+            CombatReach = 1f,
+            HoverHeight = 1f,
 
-        MovementStatus.MoveTime = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        MovementStatus.MovementFlags0 = MovementFlags0.CanFly | MovementFlags0.Flying;
-        MovementStatus.Facing = 0.1f;
+            DisplayId = 53,
+            NativeDisplayId = 53,
+            FactionTemplateId = 14
+        };
 
-        DataFields.SetUInt8Value(EPlayerFields.PLAYER_FIELD_BYTES, 0, 0, 8);
-        DataFields.SetUInt8Value(EPlayerFields.PLAYER_FIELD_BYTES, 0, 1, 1);
-
-        DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 0, 3);
-        DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 1, 5);
-        DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 2, 0);
-        DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 3, 1);
-
-        DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES_2, 0, 0, 9);
-        DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES_2, 0, 3, 1);
-
-        DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES_3, 0, 0, 1);
-
-        DataFields.SetUInt32Value(EPlayerFields.PLAYER_FIELD_MAX_LEVEL, 0, 85);
-        DataFields.SetUInt32Value(EPlayerFields.PLAYER_CHARACTER_POINTS, 0, 1);
+        return player;
     }
 }

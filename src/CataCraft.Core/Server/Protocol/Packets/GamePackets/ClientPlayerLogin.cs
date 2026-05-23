@@ -51,16 +51,25 @@ public struct ClientPlayerLogin
         await using RealmDbContext realmDb = new();
         Character? characterEntry = await realmDb.Characters
             .Include(c => c.Stats)
-            .Where(c => c.Id == playerLogin.PlayerGUID.Counter)
+            .Include(c => c.RealmCharacter)
+            .Where(c => c.Id == playerLogin.PlayerGUID.Counter
+                        && c.RealmCharacter != null
+                        && c.RealmCharacter.RealmId == session.Realm.RealmId
+                        && c.RealmCharacter.GameAccountId == session.GameAccountId)
             .FirstOrDefaultAsync();
 
-        if (characterEntry == null)
+        if (characterEntry == null || characterEntry.Stats == null)
         {
+            session.Close();
             return;
         }
 
-        Player player = new(playerLogin.PlayerGUID);
-
+        Player? player = Player.CreatePlayerFromData(characterEntry);
+        if (player == null)
+        {
+            session.Close();
+            return;
+        }
 
         player.MovementStatus.Position = new Vector3(-4025.6675f, -3915.7979f, 201.67465f);
 
