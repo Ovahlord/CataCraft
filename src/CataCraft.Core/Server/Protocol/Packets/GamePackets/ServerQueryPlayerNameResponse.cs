@@ -10,7 +10,7 @@ public ref struct ServerQueryPlayerNameResponse : IServerPacket
 {
     public int Opcode => (int)GameServerOpcodes.SMSG_QUERY_PLAYER_NAME_RESPONSE;
 
-    public WowGuid Player { get; set; } = null!;
+    public WowGuid Player { get; set; }
     public byte Result { get; set; }
     public PlayerGuidLookupData Data { get; set; }
 
