@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="src/CataCraft.Core/CataCraft.Core.csproj" />
   <Project Path="src/CataCraft.Database/CataCraft.Database.csproj" />
+  <Project Path="src/CataCraft.DBC/CataCraft.DBC.csproj" />
   <Project Path="src/CataCraft/CataCraft.csproj" />
 </Solution>
