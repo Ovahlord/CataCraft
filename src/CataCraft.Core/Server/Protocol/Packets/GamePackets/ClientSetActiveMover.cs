@@ -24,14 +24,14 @@ public ref struct ClientSetActiveMover
         moverGuid[6] = reader.ReadBit();
         moverGuid[3] = reader.ReadBit();
 
-        reader.ReadByteSeq(moverGuid, 3);
-        reader.ReadByteSeq(moverGuid, 2);
-        reader.ReadByteSeq(moverGuid, 4);
-        reader.ReadByteSeq(moverGuid, 0);
-        reader.ReadByteSeq(moverGuid, 5);
-        reader.ReadByteSeq(moverGuid, 1);
-        reader.ReadByteSeq(moverGuid, 6);
-        reader.ReadByteSeq(moverGuid, 7);
+        reader.ReadByteSeq(ref moverGuid, 3);
+        reader.ReadByteSeq(ref moverGuid, 2);
+        reader.ReadByteSeq(ref moverGuid, 4);
+        reader.ReadByteSeq(ref moverGuid, 0);
+        reader.ReadByteSeq(ref moverGuid, 5);
+        reader.ReadByteSeq(ref moverGuid, 1);
+        reader.ReadByteSeq(ref moverGuid, 6);
+        reader.ReadByteSeq(ref moverGuid, 7);
 
         MoverGUID = moverGuid;
     }

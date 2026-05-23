@@ -168,7 +168,7 @@ public ref struct ClientPacketReader
         return tempBytes;
     }
 
-    public void ReadByteSeq(WowGuid b, byte index)
+    public void ReadByteSeq(ref WowGuid b, byte index)
     {
         if (b[index] != 0)
             b[index] ^= ReadUInt8();

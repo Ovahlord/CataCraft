@@ -7,10 +7,13 @@ using CataCraft.Core.Game.World.Entities.Object;
 using CataCraft.Core.Game.World.Entities.Player;
 using CataCraft.Core.Game.World.Time;
 using CataCraft.Core.Server.Networking;
+using CataCraft.Database.Realm;
+using CataCraft.Database.Realm.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Core.Server.Protocol.Packets.GamePackets;
 
-public ref struct ClientPlayerLogin
+public struct ClientPlayerLogin
 {
     public WowGuid PlayerGUID { get; private set; } = new();
 
@@ -28,24 +31,37 @@ public ref struct ClientPlayerLogin
         playerGUID[1] = reader.ReadBit();
         playerGUID[7] = reader.ReadBit();
 
-        reader.ReadByteSeq(playerGUID, 2);
-        reader.ReadByteSeq(playerGUID, 7);
-        reader.ReadByteSeq(playerGUID, 0);
-        reader.ReadByteSeq(playerGUID, 3);
-        reader.ReadByteSeq(playerGUID, 5);
-        reader.ReadByteSeq(playerGUID, 6);
-        reader.ReadByteSeq(playerGUID, 1);
-        reader.ReadByteSeq(playerGUID, 4);
+        reader.ReadByteSeq(ref playerGUID, 2);
+        reader.ReadByteSeq(ref playerGUID, 7);
+        reader.ReadByteSeq(ref playerGUID, 0);
+        reader.ReadByteSeq(ref playerGUID, 3);
+        reader.ReadByteSeq(ref playerGUID, 5);
+        reader.ReadByteSeq(ref playerGUID, 6);
+        reader.ReadByteSeq(ref playerGUID, 1);
+        reader.ReadByteSeq(ref playerGUID, 4);
 
         PlayerGUID = playerGUID;
     }
 
-    public static ValueTask HandlePacket(ReadOnlySequence<byte> payload, GameSession session)
+    public static async ValueTask HandlePacket(ReadOnlySequence<byte> payload, GameSession session)
     {
         ClientPlayerLogin playerLogin = new (payload);
         Console.WriteLine($"Player {playerLogin.PlayerGUID} logging in.");
 
+        await using RealmDbContext realmDb = new();
+        Character? characterEntry = await realmDb.Characters
+            .Include(c => c.Stats)
+            .Where(c => c.Id == playerLogin.PlayerGUID.Counter)
+            .FirstOrDefaultAsync();
+
+        if (characterEntry == null)
+        {
+            return;
+        }
+
         Player player = new(playerLogin.PlayerGUID);
+
+
         player.MovementStatus.Position = new Vector3(-4025.6675f, -3915.7979f, 201.67465f);
 
         ServerLoginVerifiyWorld verifiyWorld = new()
@@ -86,7 +102,5 @@ public ref struct ClientPlayerLogin
 //
         //ServerTimeSyncRequest timeSyncRequest = new();
         //session.EnqueuePacket(timeSyncRequest);
-
-        return ValueTask.CompletedTask;
     }
 }
