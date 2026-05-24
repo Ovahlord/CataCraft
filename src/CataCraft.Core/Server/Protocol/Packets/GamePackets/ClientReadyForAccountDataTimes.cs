@@ -23,8 +23,6 @@ public ref struct ClientReadyForAccountDataTimes
             .Where(gad => gad.GameAccountId == session.GameAccountId)
             .Select(gad => new { gad.Id, gad.Time }).ToDictionaryAsync(k => k.Id, v => v.Time);
 
-        Console.WriteLine("query result has arrived");
-
         // Sanitize the result to make sure we send the expected amount of times
         for (int i = 0; i < (int)AccountDataType.Max; ++i)
         {

@@ -29,4 +29,5 @@ public class GameAccount
     public GameAccountSessionData? SessionData { get; set; }
     public GameAccountSuspension? Suspension { get; set; }
     public List<GameAccountData>? AccountData { get; set; }
+    public GameAccountTutorial? Tutorial { get; set; }
 }

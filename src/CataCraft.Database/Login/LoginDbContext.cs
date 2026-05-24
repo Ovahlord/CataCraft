@@ -12,6 +12,7 @@ public sealed class LoginDbContext : DbContext
     public DbSet<GameAccountSessionData> GameAccountSessionDataEntries { get; set; }
     public DbSet<GameAccountSuspension> GameAccountSuspensions { get; set; }
     public DbSet<GameAccountData> GameAccountDataEntries { get; set; }
+    public DbSet<GameAccountTutorial> GameAccountTutorials { get; set; }
 
     private static string ConnectionString => "login.db";
 

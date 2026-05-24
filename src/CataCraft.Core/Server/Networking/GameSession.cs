@@ -9,6 +9,9 @@ using CataCraft.Core.Game.Realm;
 using CataCraft.Core.Server.Protocol;
 using CataCraft.Core.Server.Protocol.Packets;
 using CataCraft.Core.Server.Protocol.Packets.GamePackets;
+using CataCraft.Database.Login;
+using CataCraft.Database.Login.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Core.Server.Networking;
 
@@ -23,6 +26,11 @@ public class GameSession : WowSession
     public byte[] AuthSeed { get; private set; } = RandomNumberGenerator.GetBytes(4);
     public Realm Realm { get; private set; }
 
+    public uint[] TutorialBits { get; private set; } = [];
+    public byte[] SessionKey { get; private set; } = [];
+    public byte AccountExpansionLevel { get; private set; }
+    public byte ActiveExpansionLevel { get; private set; }
+
     // Fields
     private PacketCrypt? _packetCrypt;
     private readonly byte[] _encryptSeed = RandomNumberGenerator.GetBytes(16);
@@ -31,6 +39,34 @@ public class GameSession : WowSession
     public GameSession(TcpClient client, Realm realm) : base(client)
     {
         Realm = realm;
+    }
+
+    public async Task<ResponseCodes> LoadGameAccountDataAsync(string accountName)
+    {
+        if (string.IsNullOrWhiteSpace(accountName))
+            return ResponseCodes.AuthUnknownAccount;
+
+        await using LoginDbContext loginDb = new();
+        GameAccount? gameAccount = await loginDb.GameAccounts
+            .Include(ga => ga.SessionData)
+            .Include(ga => ga.Tutorial)
+            .FirstOrDefaultAsync(ga => ga.AccountName.Equals(accountName));
+
+        if (gameAccount == null)
+            return ResponseCodes.AuthUnknownAccount;
+
+        if (gameAccount.SessionData == null || gameAccount.Tutorial == null)
+            return ResponseCodes.AuthFailed;
+
+        GameAccountId = gameAccount.Id;
+        AccountName = gameAccount.AccountName;
+        SessionKey = gameAccount.SessionData.SessionKey;
+        Locale = (ClientLocale)gameAccount.SessionData.ClientLocale;
+        TutorialBits = gameAccount.Tutorial.TutorialBits;
+        AccountExpansionLevel = gameAccount.ActiveExpansionLevel;
+        ActiveExpansionLevel = gameAccount.ActiveExpansionLevel;
+
+        return ResponseCodes.AuthOk;
     }
 
     protected override bool ReadHeader(ref ReadOnlySequence<byte> headerBuffer, out int opcode, out int payloadLength)
@@ -100,16 +136,12 @@ public class GameSession : WowSession
     {
         if (!ConnectionInitialized)
         {
-            Console.WriteLine("Writing header for connection initializer...");
-
             Span<byte> connectionInitializeHeader = stackalloc byte[ServerPacketHeaderSize];
             connectionInitializeHeader[0] = (byte)(0xFF & (payloadSize >> 8));
             connectionInitializeHeader[1] = (byte)(0xFF & payloadSize);
             writer.Write(connectionInitializeHeader);
             return;
         }
-
-        Console.WriteLine($"Writing packet header for Opcode {(GameServerOpcodes)opcode} with payload lenght {payloadSize}");
 
         int packetSize = payloadSize + sizeof(GameServerOpcodes);
         int headerIndex = 0;
@@ -148,11 +180,11 @@ public class GameSession : WowSession
         EnqueuePacket(ref packet);
     }
 
-    public void InitializePacketCrypt(byte[] sessionKey, bool useStaticKeys)
+    public void InitializePacketCrypt(bool useStaticKeys)
     {
         if (useStaticKeys)
-            _packetCrypt = new(sessionKey);
+            _packetCrypt = new(SessionKey);
         else
-            _packetCrypt = new(sessionKey, _encryptSeed, _decryptSeed);
+            _packetCrypt = new(SessionKey, _encryptSeed, _decryptSeed);
     }
 }

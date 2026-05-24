@@ -28,7 +28,8 @@ public static class GamePacketsDispatcher
             { GameClientOpcodes.CMSG_PING, ClientPing.HandlePacket },
             { GameClientOpcodes.CMSG_UPDATE_ACCOUNT_DATA, ClientUpdateAccountData.HandlePacket },
             { GameClientOpcodes.CMSG_REQUEST_ACCOUNT_DATA, ClientRequestAccountData.HandlePacket },
-            { GameClientOpcodes.CMSG_LOGOUT_REQUEST, ClientLogoutRequest.HandlePacket }
+            { GameClientOpcodes.CMSG_LOGOUT_REQUEST, ClientLogoutRequest.HandlePacket },
+            { GameClientOpcodes.CMSG_TUTORIAL_FLAG, ClientTutorialFlag.HandlePacket }
         }.ToFrozenDictionary();
 
     public static bool TryGetPacketHandler(GameClientOpcodes opcode, [NotNullWhen(true)] out PacketHandler? handler)

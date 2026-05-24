@@ -2,9 +2,13 @@
 
 using CataCraft.Core.Enums;
 using CataCraft.Core.Game.World.Entities.Object;
+using CataCraft.Core.Server.Networking;
+using CataCraft.Core.Server.Protocol.Packets.GamePackets;
+using CataCraft.Database.Login;
 using CataCraft.Database.Realm.Model;
 using CataCraft.DBC;
 using CataCraft.DBC.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Core.Game.World.Entities.Player;
 
@@ -56,11 +60,23 @@ public class Player : Unit.Unit
 
     #endregion // DataField accessors
 
+    #region Properties
+
+    public GameSession? Session { get; private set; }
+
+    #endregion
+
+    #region Constants
+
+    private const int PerCharacterCacheMask = 0x02 | 0x08 | 0x20 | 0x80;
+
+    #endregion
+
     public Player(WowGuid guid) : base(guid)
     {
     }
 
-    public static Player? CreatePlayerFromData(Character characterData)
+    public static Player? CreatePlayerFromData(Character characterData, GameSession session)
     {
         if (characterData.Stats == null)
             return null;
@@ -90,6 +106,8 @@ public class Player : Unit.Unit
             BoundingRadius = 1f,
             CombatReach = 1f,
             HoverHeight = 1f,
+
+            Session = session
         };
 
         player.DataFields.SetInt32Value(EPlayerFields.PLAYER_FIELD_WATCHED_FACTION_INDEX, 0, -1);
@@ -110,5 +128,40 @@ public class Player : Unit.Unit
         }
 
         return player;
+    }
+
+    public async Task SendCharacterAccountDataAsync()
+    {
+        if (Session == null || !Session.IsOpen)
+            return;
+
+        await using LoginDbContext loginDb = new();
+        var gameAccountData = await loginDb.GameAccountDataEntries
+            .Where(gad => gad.GameAccountId == Session.GameAccountId)
+            .Select(gad => new { gad.Id, gad.Time }).ToDictionaryAsync(k => k.Id, v => v.Time);
+
+        // Sanitize the result to make sure we send the expected amount of times
+        for (int i = 0; i < (int)AccountDataType.Max; ++i)
+        {
+            if ((PerCharacterCacheMask & (1 << i)) == 0)
+            {
+                gameAccountData.Remove(i);
+                continue;
+            }
+
+            gameAccountData.TryAdd(i, DateTimeOffset.UnixEpoch);
+        }
+
+        ServerAccountDataTimes accountDataTimes = new()
+        {
+            ServerTime = DateTimeOffset.Now,
+            Mask = PerCharacterCacheMask,
+            AccountTimes = gameAccountData
+                .OrderBy(gad => gad.Key)
+                .Select(gad => gad.Value)
+                .ToArray()
+        };
+
+        Session.EnqueuePacket(ref accountDataTimes);
     }
 }

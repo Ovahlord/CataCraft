@@ -33,10 +33,17 @@ class Program
                 AccountName = "ADMIN",
                 Email = "admin@admin",
                 Salt = salt,
-                Verifier = verifier
+                Verifier = verifier,
+            };
+
+            GameAccountTutorial tutorial = new()
+            {
+                GameAccount = adminAccount,
+                TutorialBits = new uint[8]
             };
 
             loginDb.GameAccounts.Add(adminAccount);
+            loginDb.GameAccountTutorials.Add(tutorial);
             await loginDb.SaveChangesAsync();
             Console.WriteLine("Created login database with admin account (Account Name: admin, password: admin)");
         }

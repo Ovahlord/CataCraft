@@ -7,9 +7,6 @@ using CataCraft.Core.Enums;
 using CataCraft.Core.Server.Networking;
 using CataCraft.Core.Server.Protocol.Packets.GamePackets.SubStructures;
 using CataCraft.Core.Utils;
-using CataCraft.Database.Login;
-using CataCraft.Database.Login.Model;
-using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Core.Server.Protocol.Packets.GamePackets;
 
@@ -122,7 +119,6 @@ public struct ClientAuthSession
     public static async ValueTask HandlePacket(ReadOnlySequence<byte> payload, GameSession session)
     {
         ClientAuthSession clientAuthSession = new(payload);
-        session.AccountName = clientAuthSession.Account;
 
         // We don't allow auth session requests when the packet crypt has already been set up
         if (session.PacketCryptInitialized)
@@ -131,36 +127,27 @@ public struct ClientAuthSession
             return;
         }
 
-        await using LoginDbContext loginDb = new();
-        GameAccount? gameAccount = await loginDb.GameAccounts
-            .Include(ga => ga.SessionData)
-            .FirstOrDefaultAsync(ga => ga.AccountName.Equals(session.AccountName));
-
-        if (gameAccount == null)
+        // Load game account data from database and initialize internal fields
+        ResponseCodes loadResponse = await session.LoadGameAccountDataAsync(clientAuthSession.Account);
+        if (loadResponse != ResponseCodes.AuthOk)
         {
-            SendAuthResponseError(ResponseCodes.AuthUnknownAccount, session);
-            return;
-        }
-
-        if (gameAccount.SessionData == null)
-        {
-            SendAuthResponseError(ResponseCodes.AuthBadServerProof, session);
+            SendAuthResponseError(loadResponse, session);
             return;
         }
 
         // Initialize the packet crypt
-        session.InitializePacketCrypt(gameAccount.SessionData.SessionKey, true);
+        session.InitializePacketCrypt(true);
 
         // Check that Key and account name are the same on client and server
         uint t = 0;
-        byte[] accountBytes = Encoding.UTF8.GetBytes(gameAccount.AccountName);
+        byte[] accountBytes = Encoding.UTF8.GetBytes(session.AccountName);
 
         using SHA1 sha = SHA1.Create();
         sha.TransformBlock(accountBytes, 0, accountBytes.Length, null, 0);
         sha.TransformBlock(BitConverter.GetBytes(t), 0, 4, null, 0);
         sha.TransformBlock(BitConverter.GetBytes(clientAuthSession.LocalChallenge), 0, 4, null, 0);
         sha.TransformBlock(session.AuthSeed, 0, session.AuthSeed.Length, null, 0);
-        sha.TransformFinalBlock(gameAccount.SessionData.SessionKey, 0, gameAccount.SessionData.SessionKey.Length);
+        sha.TransformFinalBlock(session.SessionKey, 0, session.SessionKey.Length);
 
         byte[]? hash = sha.Hash;
         if (hash == null)
@@ -175,16 +162,13 @@ public struct ClientAuthSession
             return;
         }
 
-        // Store the account id for faster db access in future mechanics
-        session.GameAccountId = gameAccount.Id;
-
         ServerAuthResponse response = new()
         {
             Result = ResponseCodes.AuthOk,
             SuccessInfo = new()
             {
-                AccountExpansionLevel = gameAccount.ExpansionLevel,
-                ActiveExpansionLevel = gameAccount.ActiveExpansionLevel
+                AccountExpansionLevel = session.AccountExpansionLevel,
+                ActiveExpansionLevel = session.ActiveExpansionLevel
             }
         };
 
@@ -195,6 +179,13 @@ public struct ClientAuthSession
 
         ServerClientCacheVersion cacheVersion = new();
         session.EnqueuePacket(ref cacheVersion);
+
+        ServerTutorialFlags serverTutorialFlags = new()
+        {
+            TutorialData = session.TutorialBits
+        };
+
+        session.EnqueuePacket(ref serverTutorialFlags);
     }
 
     private static void SendAuthResponseError(ResponseCodes error, GameSession session)

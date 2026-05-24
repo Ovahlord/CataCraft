@@ -64,7 +64,7 @@ public struct ClientPlayerLogin
             return;
         }
 
-        Player? player = Player.CreatePlayerFromData(characterEntry);
+        Player? player = Player.CreatePlayerFromData(characterEntry, session);
         if (player == null)
         {
             session.Close();
@@ -81,7 +81,12 @@ public struct ClientPlayerLogin
 
         session.EnqueuePacket(ref verifiyWorld);
 
-        ServerTutorialFlags tutorialFlags = new();
+        await player.SendCharacterAccountDataAsync();
+
+        ServerTutorialFlags tutorialFlags = new()
+        {
+            TutorialData = session.TutorialBits
+        };
         session.EnqueuePacket(ref tutorialFlags);
 
         ServerLoginSetTimeSpeed loginSetTimeSpeed = new()
