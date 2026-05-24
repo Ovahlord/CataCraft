@@ -92,6 +92,8 @@ public class Player : Unit.Unit
             HoverHeight = 1f,
         };
 
+        player.DataFields.SetInt32Value(EPlayerFields.PLAYER_FIELD_WATCHED_FACTION_INDEX, 0, -1);
+
         if (DBCManager.SChrRacesStore.TryGetValue(characterData.RaceId, out ChrRacesEntry? race))
         {
             player.FactionTemplateId = (uint)race.FactionID;

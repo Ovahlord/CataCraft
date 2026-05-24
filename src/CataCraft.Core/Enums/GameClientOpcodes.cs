@@ -392,7 +392,6 @@ public enum GameClientOpcodes
     CMSG_PLAYED_TIME                                      = 0x0804, // NYI
     CMSG_PLAYER_DIFFICULTY_CHANGE                         = 0x0000, // NYI
     CMSG_PLAYER_LOGIN                                     = 0x05B1, // NYI
-    CMSG_PLAYER_LOGOUT                                    = 0x0000, // NYI
     CMSG_PLAYER_VEHICLE_ENTER                             = 0x2705, // NYI
     CMSG_PLAY_DANCE                                       = 0x6914, // NYI
     CMSG_PUSHQUESTTOPARTY                                 = 0x4B14, // NYI

@@ -93,6 +93,16 @@ public struct ClientPlayerLogin
         ServerFeatureSystemStatus featureSystemStatus = new();
         session.EnqueuePacket(ref featureSystemStatus);
 
+        ServerInitializeFactions initializeFactions = new()
+        {
+            FactionStandings = new FactionStanding[256],
+            FactionFlags = new  FactionFlags[256]
+        };
+
+        Array.Fill(initializeFactions.FactionFlags, FactionFlags.Visible);
+
+        session.EnqueuePacket(ref initializeFactions);
+
         ServerUpdateObject updateObject = new();
         updateObject.AddObjectToCreate(
             player,
