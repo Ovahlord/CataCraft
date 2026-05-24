@@ -10,6 +10,7 @@
     <ItemGroup>
       <ProjectReference Include="..\CataCraft.Core\CataCraft.Core.csproj" />
       <ProjectReference Include="..\CataCraft.Database\CataCraft.Database.csproj" />
+      <ProjectReference Include="..\CataCraft.DBC\CataCraft.DBC.csproj" />
     </ItemGroup>
 
 </Project>

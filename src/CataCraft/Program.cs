@@ -6,6 +6,7 @@ using CataCraft.Core.Server.Networking;
 using CataCraft.Database.Login;
 using CataCraft.Database.Login.Model;
 using CataCraft.Database.Realm;
+using CataCraft.DBC;
 using Realm = CataCraft.Database.Realm.Model.Realm;
 
 namespace CataCraft;
@@ -15,6 +16,9 @@ class Program
     static async Task Main(string[] args)
     {
         Console.WriteLine("Starting application...");
+
+        Console.WriteLine("Loading DBC storages...");
+        await DBCManager.LoadStoragesAsync();
 
         Console.WriteLine("Ensuring Databases are created...");
 

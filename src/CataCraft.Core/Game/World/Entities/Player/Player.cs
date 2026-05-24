@@ -3,6 +3,8 @@
 using CataCraft.Core.Enums;
 using CataCraft.Core.Game.World.Entities.Object;
 using CataCraft.Database.Realm.Model;
+using CataCraft.DBC;
+using CataCraft.DBC.Model;
 
 namespace CataCraft.Core.Game.World.Entities.Player;
 
@@ -88,11 +90,22 @@ public class Player : Unit.Unit
             BoundingRadius = 1f,
             CombatReach = 1f,
             HoverHeight = 1f,
-
-            DisplayId = 53,
-            NativeDisplayId = 53,
-            FactionTemplateId = 14
         };
+
+        if (DBCManager.SChrRacesStore.TryGetValue(characterData.RaceId, out ChrRacesEntry? race))
+        {
+            player.FactionTemplateId = (uint)race.FactionID;
+            if (player.Sex == UnitSex.Male)
+            {
+                player.DisplayId = (uint)race.MaleDisplayID;
+                player.NativeDisplayId = (uint)race.MaleDisplayID;
+            }
+            else
+            {
+                player.DisplayId = (uint)race.FemaleDisplayID;
+                player.NativeDisplayId = (uint)race.FemaleDisplayID;
+            }
+        }
 
         return player;
     }
