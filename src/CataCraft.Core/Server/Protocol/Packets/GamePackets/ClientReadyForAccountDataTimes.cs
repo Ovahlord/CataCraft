@@ -39,7 +39,10 @@ public ref struct ClientReadyForAccountDataTimes
         {
             ServerTime = DateTimeOffset.Now,
             Mask = GlobalCacheMask,
-            AccountTimes = gameAccountData.Values.ToArray()
+            AccountTimes = gameAccountData
+                .OrderBy(gad => gad.Key)
+                .Select(gad => gad.Value)
+                .ToArray()
         };
 
         session.EnqueuePacket(ref accountDataTimes);
