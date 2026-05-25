@@ -29,7 +29,9 @@ public static class GamePacketsDispatcher
             { GameClientOpcodes.CMSG_UPDATE_ACCOUNT_DATA, ClientUpdateAccountData.HandlePacket },
             { GameClientOpcodes.CMSG_REQUEST_ACCOUNT_DATA, ClientRequestAccountData.HandlePacket },
             { GameClientOpcodes.CMSG_LOGOUT_REQUEST, ClientLogoutRequest.HandlePacket },
-            { GameClientOpcodes.CMSG_TUTORIAL_FLAG, ClientTutorialFlag.HandlePacket }
+            { GameClientOpcodes.CMSG_TUTORIAL_FLAG, ClientTutorialFlag.HandlePacket },
+            { GameClientOpcodes.CMSG_TUTORIAL_CLEAR, ClientTutorialClear.HandlePacket },
+            { GameClientOpcodes.CMSG_TUTORIAL_RESET, ClientTutorialReset.HandlePacket }
         }.ToFrozenDictionary();
 
     public static bool TryGetPacketHandler(GameClientOpcodes opcode, [NotNullWhen(true)] out PacketHandler? handler)
