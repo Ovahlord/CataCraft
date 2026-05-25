@@ -14,6 +14,11 @@ public struct ServerCreateChar : IServerPacket
     {
     }
 
+    public ServerCreateChar(ResponseCodes code)
+    {
+        Code = code;
+    }
+
     public void Serialize(out byte[] buffer, out int payloadLength)
     {
         ServerPacketWriter writer = new();

@@ -5,6 +5,7 @@ using CataCraft.Core.Game.World.Entities.Object;
 using CataCraft.Core.Server.Networking;
 using CataCraft.Core.Server.Protocol.Packets.GamePackets;
 using CataCraft.Database.Login;
+using CataCraft.Database.Realm;
 using CataCraft.Database.Realm.Model;
 using CataCraft.DBC;
 using CataCraft.DBC.Model;
@@ -110,6 +111,7 @@ public class Player : Unit.Unit
             Session = session
         };
 
+        session.Player = player;
         player.DataFields.SetInt32Value(EPlayerFields.PLAYER_FIELD_WATCHED_FACTION_INDEX, 0, -1);
 
         if (DBCManager.SChrRacesStore.TryGetValue(characterData.RaceId, out ChrRacesEntry? race))
@@ -135,9 +137,9 @@ public class Player : Unit.Unit
         if (Session == null || !Session.IsOpen)
             return;
 
-        await using LoginDbContext loginDb = new();
-        var gameAccountData = await loginDb.GameAccountDataEntries
-            .Where(gad => gad.GameAccountId == Session.GameAccountId)
+        await using RealmDbContext realmDb = new();
+        var gameAccountData = await realmDb.CharacterDataEntries
+            .Where(cd => cd.CharacterId == Guid.Counter)
             .Select(gad => new { gad.Id, gad.Time }).ToDictionaryAsync(k => k.Id, v => v.Time);
 
         // Sanitize the result to make sure we send the expected amount of times

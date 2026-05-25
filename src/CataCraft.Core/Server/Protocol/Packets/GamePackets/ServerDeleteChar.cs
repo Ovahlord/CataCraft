@@ -4,7 +4,7 @@ using CataCraft.Core.Enums;
 
 namespace CataCraft.Core.Server.Protocol.Packets.GamePackets;
 
-public struct ServerDeleteChar : IServerPacket
+public ref struct ServerDeleteChar : IServerPacket
 {
     public int Opcode => (int)GameServerOpcodes.SMSG_DELETE_CHAR;
 
@@ -12,6 +12,11 @@ public struct ServerDeleteChar : IServerPacket
 
     public ServerDeleteChar()
     {
+    }
+
+    public ServerDeleteChar(ResponseCodes code)
+    {
+        Code = code;
     }
 
     public void Serialize(out byte[] buffer, out int payloadLength)

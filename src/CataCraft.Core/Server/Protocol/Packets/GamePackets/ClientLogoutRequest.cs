@@ -24,5 +24,8 @@ public ref struct ClientLogoutRequest
 
         ServerLogoutComplete serverLogoutComplete = new();
         session.EnqueuePacket(ref serverLogoutComplete);
+
+        // Free the player reference so that GC may collect it
+        session.Player = null;
     }
 }

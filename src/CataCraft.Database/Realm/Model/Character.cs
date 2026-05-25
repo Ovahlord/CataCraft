@@ -32,6 +32,7 @@ public class Character
     public DateTime CreationTime { get; set; } = DateTime.UtcNow;
 
     // Navigation properties
+    public CharacterData? CharacterData { get; set; }
     public CharacterStats? Stats { get; set; }
     public RealmCharacter? RealmCharacter { get; set; }
 }

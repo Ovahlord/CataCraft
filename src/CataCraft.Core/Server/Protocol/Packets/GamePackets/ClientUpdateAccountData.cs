@@ -6,6 +6,8 @@ using CataCraft.Core.Server.Networking;
 using CataCraft.Core.Utils;
 using CataCraft.Database.Login;
 using CataCraft.Database.Login.Model;
+using CataCraft.Database.Realm;
+using CataCraft.Database.Realm.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Core.Server.Protocol.Packets.GamePackets;
@@ -43,27 +45,70 @@ public struct ClientUpdateAccountData
             return;
         }
 
-        await using LoginDbContext loginDb = new();
-        GameAccountData? accountData = await loginDb.GameAccountDataEntries
-            .FirstOrDefaultAsync(ga => ga.GameAccountId == session.GameAccountId && ga.Id == (int)updateAccountData.DataType);
-
-        if (accountData == null)
+        switch (updateAccountData.DataType)
         {
-            loginDb.GameAccountDataEntries.Add(new GameAccountData()
-            {
-                GameAccountId = session.GameAccountId,
-                Id = (int)updateAccountData.DataType,
-                Data = updateAccountData.Data,
-                Time = updateAccountData.Time
-            });
-        }
-        else
-        {
-            accountData.Data = updateAccountData.Data ?? [];
-            accountData.Time = updateAccountData.Time;
+            // Per character data is indexed by character
+            case AccountDataType.PerCharacterConfigCache:
+            case AccountDataType.PerCharacterBindingsCache:
+            case AccountDataType.PerCharacterMacrosCache:
+            case AccountDataType.PerCharacterLayoutCache:
+            case AccountDataType.PerCharacterChatCache:
+                {
+                    if (session.Player == null)
+                        return;
+
+                    await using RealmDbContext realmDb = new();
+                    CharacterData? characterData = await realmDb.CharacterDataEntries
+                        .FirstOrDefaultAsync(cd => cd.CharacterId == session.Player.Guid.Counter &&
+                                                   cd.Id == (int)updateAccountData.DataType);
+
+                    if (characterData == null)
+                    {
+                        realmDb.CharacterDataEntries.Add(new CharacterData()
+                        {
+                            CharacterId = (int)session.Player.Guid.Counter,
+                            Id = (int)updateAccountData.DataType,
+                            Data = updateAccountData.Data,
+                            Time = updateAccountData.Time
+                        });
+                    }
+                    else
+                    {
+                        characterData.Data = updateAccountData.Data ?? [];
+                        characterData.Time = updateAccountData.Time;
+                    }
+
+                    await realmDb.SaveChangesAsync();
+                    break;
+                }
+            default:
+                {
+                    // Global account data is account wide
+                    await using LoginDbContext loginDb = new();
+                    GameAccountData? accountData = await loginDb.GameAccountDataEntries
+                        .FirstOrDefaultAsync(ga => ga.GameAccountId == session.GameAccountId && ga.Id == (int)updateAccountData.DataType);
+
+                    if (accountData == null)
+                    {
+                        loginDb.GameAccountDataEntries.Add(new GameAccountData()
+                        {
+                            GameAccountId = session.GameAccountId,
+                            Id = (int)updateAccountData.DataType,
+                            Data = updateAccountData.Data,
+                            Time = updateAccountData.Time
+                        });
+                    }
+                    else
+                    {
+                        accountData.Data = updateAccountData.Data ?? [];
+                        accountData.Time = updateAccountData.Time;
+                    }
+
+                    await loginDb.SaveChangesAsync();
+                    break;
+                }
         }
 
-        await loginDb.SaveChangesAsync();
 
         ServerUpdateAccountDataComplete updateAccountDataComplete = new()
         {

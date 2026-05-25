@@ -11,6 +11,8 @@ public class RealmDbContext : DbContext
     public DbSet<Model.Realm> Realms { get; set; }
     public DbSet<RealmCharacter> RealmCharacters { get; set; }
     public DbSet<Character> Characters { get; set; }
+    public DbSet<CharacterStats> CharacterStats { get; set; }
+    public DbSet<CharacterData> CharacterDataEntries { get; set; }
 
     private static readonly string s_connectionString = GetConnectionString();
 

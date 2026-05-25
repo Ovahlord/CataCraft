@@ -17,5 +17,6 @@ public class GameAccountSuspension
     [MaxLength(100)]
     public string SuspensionReason { get; set; } = string.Empty;
 
+    // Navigation property
     private GameAccount GameAccount { get; set; } = null!;
 }
