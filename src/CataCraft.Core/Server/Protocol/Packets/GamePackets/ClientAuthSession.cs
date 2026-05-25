@@ -195,7 +195,7 @@ public struct ClientAuthSession
             Result = error
         };
 
-        session.EnqueuePacket(ref serverAuthResponse);
+        session.EnqueuePacket(ref serverAuthResponse, true);
     }
 
     private static void SendAddonInfo(ReadOnlySpan<SecureAddonInfo> secureAddons, GameSession session)
