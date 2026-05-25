@@ -55,8 +55,6 @@ public struct ClientAuthLogonProof
 
         ClientAuthLogonProof clientAuthLogonProof = new(payload);
 
-        Console.WriteLine("Received logon proof");
-
         if (session.SRP6 == null)
         {
             SendAuthLogonProofError(AuthResult.WowFailNoGameAccount, session);
@@ -65,7 +63,6 @@ public struct ClientAuthLogonProof
 
         if (!session.SRP6.VerifyChallengeResponse(clientAuthLogonProof.A, clientAuthLogonProof.ClientM, out byte[]? sessionKey))
         {
-            Console.WriteLine("Authentication failed");
             SendAuthLogonProofError(AuthResult.WowFailNoGameAccount, session);
             return;
         }
