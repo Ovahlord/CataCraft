@@ -34,12 +34,12 @@ public ref struct ClientRealmList
         ServerRealmList realmList = new();
         foreach (Game.Realm.Realm realm in RealmManager.Realms)
         {
-            Protocol.Packets.GruntPackets.SubStructures.Realm realmEntry = new()
+            SubStructures.Realm realmEntry = new()
             {
                 Type = realm.Type,
                 Locked = realm.LockedForNewPlayers,
                 Name =  realm.RealmName,
-                Address = realm.EntryIpEndpoint,
+                Address = realm.EntryIpEndpoint.ToString(),
                 Population = realm.Population,
                 RealmCategory = realm.RealmCategory,
                 RealmId = realm.RealmId,

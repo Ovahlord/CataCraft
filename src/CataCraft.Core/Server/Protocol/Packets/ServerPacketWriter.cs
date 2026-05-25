@@ -24,6 +24,11 @@ public ref struct ServerPacketWriter
         _buffer = s_bufferPool.Rent(InitialBufferSize);
     }
 
+    public void ReturnBuffer()
+    {
+        s_bufferPool.Return(_buffer);
+    }
+
     public void WriteUInt8(byte value)
     {
         GetSpan(sizeof(byte))[0] = value;

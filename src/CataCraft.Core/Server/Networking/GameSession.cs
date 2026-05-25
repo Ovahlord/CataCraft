@@ -2,6 +2,7 @@
 
 using System.Buffers;
 using System.Buffers.Binary;
+using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using CataCraft.Core.Enums;
@@ -9,6 +10,7 @@ using CataCraft.Core.Game.Realm;
 using CataCraft.Core.Server.Protocol;
 using CataCraft.Core.Server.Protocol.Packets;
 using CataCraft.Core.Server.Protocol.Packets.GamePackets;
+using CataCraft.Core.Server.Protocol.Packets.GamePackets.SubStructures;
 using CataCraft.Database.Login;
 using CataCraft.Database.Login.Model;
 using Microsoft.EntityFrameworkCore;
@@ -194,5 +196,27 @@ public class GameSession : WowSession
             _packetCrypt = new(SessionKey);
         else
             _packetCrypt = new(SessionKey, _encryptSeed, _decryptSeed);
+    }
+
+    public void SendConnectTo(IPEndPoint where, ConnectToConnectionType connectionType)
+    {
+        ConnectToKey key = new()
+        {
+            AccountId = (uint)GameAccountId,
+            ConnectionType = connectionType,
+            Key = (uint)RandomNumberGenerator.GetInt32(0x7FFFFFFF)
+        };
+
+        ConnectToPayload payload = new(where);
+
+        ServerConnectTo connectTo = new()
+        {
+            Key = key.Raw,
+            Serial = 14,
+            Payload = payload,
+            Con = connectionType,
+        };
+
+        EnqueuePacket(ref connectTo);
     }
 }

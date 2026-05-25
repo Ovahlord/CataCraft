@@ -23,15 +23,15 @@ public class Realm
     public byte RealmId { get; private set; }
     public string RealmName { get; private set; }
     public RealmType Type { get; private set; }
+    public IPEndPoint SecureIpEndpoint { get; private set; }
+    public IPEndPoint EntryIpEndpoint { get; private set; }
     public byte RealmCategory { get; private set; }
-    public string EntryIpEndpoint { get; private set; }
     public bool LockedForNewPlayers { get; private set; }
     public bool RecommendedForNewPlayers { get; private set; }
     public bool IsFull { get; private set; }
     public int AllowedBuild { get; private set; }
     public bool Online { get;  private set; }
     public float Population { get; private set; }
-
     public World.World World { get; private set; }
 
     // Internal fields
@@ -41,13 +41,14 @@ public class Realm
 
     public Realm(Database.Realm.Model.Realm realmDbEntry)
     {
-        _entryConnectionListener = new(IPEndPoint.Parse(realmDbEntry.EntryIpEndpoint));
-        _securedConnectionListener = new(IPEndPoint.Parse(realmDbEntry.SecureIpEndpoint));
+        EntryIpEndpoint = IPEndPoint.Parse(realmDbEntry.EntryIpEndpoint);
+        SecureIpEndpoint = IPEndPoint.Parse(realmDbEntry.SecureIpEndpoint);
+        _entryConnectionListener = new(EntryIpEndpoint);
+        _securedConnectionListener = new(SecureIpEndpoint);
         RealmId = realmDbEntry.Id;
         RealmName = realmDbEntry.RealmName;
         Type = (RealmType)realmDbEntry.RealmType;
         RealmCategory = realmDbEntry.RealmCategory;
-        EntryIpEndpoint = realmDbEntry.EntryIpEndpoint;
         LockedForNewPlayers = realmDbEntry.LockedForNewPlayers;
         RecommendedForNewPlayers = realmDbEntry.RecommendedForNewPlayers;
         AllowedBuild = realmDbEntry.AllowedBuild;
