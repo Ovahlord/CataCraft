@@ -1,5 +1,6 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
+using CataCraft.Configuration;
 using CataCraft.Database.Login.Model;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,10 +15,18 @@ public sealed class LoginDbContext : DbContext
     public DbSet<GameAccountData> GameAccountDataEntries { get; set; }
     public DbSet<GameAccountTutorial> GameAccountTutorials { get; set; }
 
-    private static string ConnectionString => "login.db";
+    private static readonly string s_connectionString = GetConnectionString();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite($"Data Source={ConnectionString}");
+        optionsBuilder.UseSqlite($"Data Source={s_connectionString}");
+    }
+
+    private static string GetConnectionString()
+    {
+        if (ConfigManager.TryGetConnectionString("LoginDatabase", out string? connectionString))
+            return connectionString;
+
+        return string.Empty;
     }
 }

@@ -13,7 +13,7 @@ public static class RealmManager
     // Internal fields
     private static readonly Dictionary<int, Realm> s_realms = [];
 
-    public static async Task LoadRealms()
+    public static async Task LoadRealmsAsync()
     {
         await using RealmDbContext realmDb = new();
         List<Database.Realm.Model.Realm> realmDbEntries = realmDb.Realms.ToList();

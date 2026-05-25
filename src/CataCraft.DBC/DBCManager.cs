@@ -1,6 +1,7 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
 using System.Reflection;
+using CataCraft.Configuration;
 using CataCraft.DBC.Attributes;
 using CataCraft.DBC.Model;
 using DBCD.IO;
@@ -341,8 +342,21 @@ public static class DBCManager
     public static Dictionary<int, TransportAnimationEntry> STransportAnimationStore { get; private set; } = [];
     public static Dictionary<int, AnimKitPriorityEntry> SAnimKitPriorityStore { get; private set; } = [];
 
-    public static async Task LoadStoragesAsync()
+    private static readonly string s_dbcDirectoryPath;
+
+    static DBCManager()
     {
+        if (!ConfigManager.TryGetConfigValue("DBCPath", out string? path)
+            || !ConfigManager.TryGetConfigValue("DBCLocale", out string? locale))
+            throw new Exception("Config values for DBCPath and DBCLocale must be specified.");
+
+        s_dbcDirectoryPath = Path.Combine(path, locale);
+    }
+
+    public static void LoadStoragesAsync()
+    {
+        Console.WriteLine($"Loading DBC storages from path: {s_dbcDirectoryPath}");
+
         // Select all storage properties from the class
         PropertyInfo[] storageProperties = typeof(DBCManager).GetProperties(BindingFlags.Static | BindingFlags.Public);
 
@@ -350,7 +364,7 @@ public static class DBCManager
         // a nice async API for now
         Parallel.ForEach(storageProperties, LoadStorageAsync);
 
-        Console.WriteLine($"Loaded {storageProperties.Length} storages");
+        Console.WriteLine($"Loaded {storageProperties.Length} DBC storages");
     }
 
     private static void LoadStorageAsync(PropertyInfo storage)
@@ -363,7 +377,7 @@ public static class DBCManager
         if (dbFileAttribute == null)
             return;
 
-        string filePath = Path.Combine(GetDBCDirectoryPath(), $"{dbFileAttribute.FileName}");
+        string filePath = Path.Combine(s_dbcDirectoryPath, dbFileAttribute.FileName);
         if (!File.Exists(filePath))
             return;
 
@@ -374,14 +388,5 @@ public static class DBCManager
 
         MethodInfo genericMethod = methodInfo.MakeGenericMethod(dbcType);
         genericMethod.Invoke(parser, [storage.GetValue(null)]);
-    }
-
-    private static string GetDBCDirectoryPath()
-    {
-        string? assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        string dbcFolderLocation = Path.Combine(assemblyLocation ?? string.Empty, "dbc");
-        string dbcLocaleFolderLocation = Path.Combine(dbcFolderLocation, "enUS");
-
-        return dbcLocaleFolderLocation;
     }
 }

@@ -1,13 +1,11 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using CataCraft.Configuration;
 using CataCraft.Core.Cryptography;
 using CataCraft.Core.Game.Realm;
 using CataCraft.Core.Server.Networking;
-using CataCraft.Database.Login;
-using CataCraft.Database.Login.Model;
-using CataCraft.Database.Realm;
+using CataCraft.Database;
 using CataCraft.DBC;
-using Realm = CataCraft.Database.Realm.Model.Realm;
 
 namespace CataCraft;
 
@@ -15,64 +13,44 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        Console.WriteLine("Starting application...");
+        // Load Config.json
+        ConfigManager.LoadConfiguration();
 
-        Console.WriteLine("Loading DBC storages...");
-        await DBCManager.LoadStoragesAsync();
+        // Load DBC files
+        DBCManager.LoadStoragesAsync();
 
-        Console.WriteLine("Ensuring Databases are created...");
-
-        // =============== LOGIN DATABASE ========================
-        await using LoginDbContext loginDb = new();
-        if (await loginDb.Database.EnsureCreatedAsync())
+        // Set up database if needed
+        if (await DatabaseManager.InitializeDatabasesAsync())
         {
-            (byte[] salt, byte[] verifier) = SRP6.GenerateRegistrationData("admin", "admin");
+            Console.WriteLine("Databases have been successfully initialized");
 
-            GameAccount adminAccount = new()
+            if (ConfigManager.TryGetConfigValue("CreateDefaultAdminAccount", out bool create) && create)
             {
-                AccountName = "ADMIN",
-                Email = "admin@admin",
-                Salt = salt,
-                Verifier = verifier,
-            };
+                (byte[] salt, byte[] verifier) = SRP6.GenerateRegistrationData("ADMIN", "admin");
+                if (await DatabaseManager.CreateGameAccountAsync("ADMIN", "admin@admin", salt, verifier))
+                    Console.WriteLine("Created admin GameAccount - user: admin || pass: admin");
+            }
 
-            GameAccountTutorial tutorial = new()
+            if (ConfigManager.TryGetConfigValue("CreateDefaultRealm", out create) && create)
             {
-                GameAccount = adminAccount,
-                TutorialBits = new uint[8]
-            };
-
-            loginDb.GameAccounts.Add(adminAccount);
-            loginDb.GameAccountTutorials.Add(tutorial);
-            await loginDb.SaveChangesAsync();
-            Console.WriteLine("Created login database with admin account (Account Name: admin, password: admin)");
+                await DatabaseManager.CreateDefaultRealmAsync();
+                Console.WriteLine("Default realm 'CataCraft' has been created");
+            }
         }
 
+        await RealmManager.LoadRealmsAsync();
 
-        // =============== REALM DATABASE ========================
-        await using RealmDbContext realmDb = new();
-        if (await realmDb.Database.EnsureCreatedAsync())
+        if (ConfigManager.TryGetConfigValue("LoginIpEndpoint", out string? ipEndpoint))
         {
-            Realm realm = new()
+            TcpListener listener = new(IPEndPoint.Parse(ipEndpoint));
+            listener.Start();
+
+            while (true)
             {
-                RealmName = "CataCraft",
-            };
-
-            realmDb.Realms.Add(realm);
-            await realmDb.SaveChangesAsync();
-            Console.WriteLine("Created realm database with default realm 'CataCraft'");
-        }
-
-        await RealmManager.LoadRealms();
-
-        TcpListener listener = new(IPEndPoint.Parse("127.0.0.1:3724"));
-        listener.Start();
-
-        while (true)
-        {
-            TcpClient client = await listener.AcceptTcpClientAsync();
-            Console.WriteLine($"Client connected: {client.Client.RemoteEndPoint}");
-            GruntSession session = new(client);
+                TcpClient client = await listener.AcceptTcpClientAsync();
+                Console.WriteLine($"Client connected: {client.Client.RemoteEndPoint}");
+                GruntSession session = new(client);
+            }
         }
     }
 }

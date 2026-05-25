@@ -15,4 +15,8 @@
       <Folder Include="Model\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\CataCraft.Configuration\CataCraft.Configuration.csproj" />
+    </ItemGroup>
+
 </Project>

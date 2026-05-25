@@ -1,0 +1,12 @@
+{
+  "DBCPath": "./dbc",
+  "DBCLocale": "enUS",
+  "CreateDefaultAdminAccount": true,
+  "CreateDefaultRealm": true,
+  "LoginIpEndpoint": "127.0.0.1:3724",
+
+  "ConnectionStrings": {
+    "LoginDatabase": "login.db",
+    "RealmDatabase": "realm.db"
+  }
+}

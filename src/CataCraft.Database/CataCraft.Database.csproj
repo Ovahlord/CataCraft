@@ -10,4 +10,8 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.7" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\CataCraft.Configuration\CataCraft.Configuration.csproj" />
+    </ItemGroup>
+
 </Project>
