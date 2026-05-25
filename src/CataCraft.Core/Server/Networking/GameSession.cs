@@ -41,6 +41,14 @@ public class GameSession : WowSession
         Realm = realm;
     }
 
+    /// <summary>
+    /// Loads the game account information for the specified account name and initializes several session specific
+    /// properties
+    /// </summary>
+    /// <param name="accountName">The GameAccount name that is attempting to authenticate</param>
+    /// <returns>ResponseCodes.AuthOk when the game account and its related tables have been successfully loaded.
+    /// Will return ResponseCodes.AuthUnknownAccount when no game account has been found or ResponseCodes.AuthFailed
+    /// when no session or tutorial data has been found</returns>
     public async Task<ResponseCodes> LoadGameAccountDataAsync(string accountName)
     {
         if (string.IsNullOrWhiteSpace(accountName))

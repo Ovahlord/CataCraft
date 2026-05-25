@@ -30,6 +30,8 @@ public abstract class WowSession
     private readonly TcpClient _client;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly Channel<ServerPacketData> _packetQueue = Channel.CreateUnbounded<ServerPacketData>();
+    private readonly PipeReader _pipeReader;
+    private readonly PipeWriter _pipeWriter;
     private bool _closeSessionAfterSendingPackets;
 
     // Protected properties
@@ -44,21 +46,19 @@ public abstract class WowSession
     protected WowSession(TcpClient client)
     {
         _client = client;
+        _pipeReader = PipeReader.Create(_client.GetStream());
+        _pipeWriter = PipeWriter.Create(_client.GetStream());
         _ = ReadFromStreamAsync(_cancellationTokenSource.Token);
         _ = WriteToStreamAsync(_cancellationTokenSource.Token);
     }
 
     private async Task ReadFromStreamAsync(CancellationToken cancellationToken = default)
     {
-        StreamPipeReaderOptions options = new();
-
-        PipeReader reader = PipeReader.Create(_client.GetStream(), options);
-
         try
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                ReadResult result = await reader.ReadAsync(cancellationToken);
+                ReadResult result = await _pipeReader.ReadAsync(cancellationToken);
                 if (result.IsCanceled)
                 {
                     Close();
@@ -98,7 +98,7 @@ public abstract class WowSession
                 }
 
                 // Advance the reader and mark the entire buffer as examined so that we can receive new data
-                reader.AdvanceTo(currentPosition, buffer.End);
+                _pipeReader.AdvanceTo(currentPosition, buffer.End);
 
                 if (result.IsCompleted)
                 {
@@ -113,18 +113,15 @@ public abstract class WowSession
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            Close();
         }
         finally
         {
-            await reader.CompleteAsync();
+            Close();
         }
     }
 
     private async Task WriteToStreamAsync(CancellationToken cancellationToken = default)
     {
-        PipeWriter writer = PipeWriter.Create(_client.GetStream());
-
         try
         {
             while (!cancellationToken.IsCancellationRequested)
@@ -135,9 +132,9 @@ public abstract class WowSession
                 {
                     try
                     {
-                        WriteHeader(writer, packetData.Opcode, packetData.PayloadLength);
+                        WriteHeader(_pipeWriter, packetData.Opcode, packetData.PayloadLength);
                         if (packetData.Buffer.Length > 0)
-                            writer.Write(packetData.Buffer.AsSpan(0, packetData.PayloadLength));
+                            _pipeWriter.Write(packetData.Buffer.AsSpan(0, packetData.PayloadLength));
                     }
                     finally
                     {
@@ -145,7 +142,7 @@ public abstract class WowSession
                     }
                 }
 
-                FlushResult result = await writer.FlushAsync(cancellationToken);
+                FlushResult result = await _pipeWriter.FlushAsync(cancellationToken);
                 if (result.IsCompleted || _closeSessionAfterSendingPackets)
                 {
                     Close();
@@ -159,11 +156,10 @@ public abstract class WowSession
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            Close();
         }
         finally
         {
-            await writer.CompleteAsync();
+            Close();
         }
     }
 
@@ -180,9 +176,12 @@ public abstract class WowSession
 
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
+
+        _pipeReader.Complete();
+        _pipeWriter.Complete();
         _client.Dispose();
 
-        Console.WriteLine("Closed session");
+        Console.WriteLine("WowSession has been closed.");
     }
 
     public void EnqueuePacket<TPacket>(ref TPacket packet, bool closeAfterSend = false) where TPacket : struct, IServerPacket, allows ref struct
