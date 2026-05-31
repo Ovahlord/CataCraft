@@ -1,9 +1,9 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
 using CataCraft.Core.Enums;
-using CataCraft.Core.Game.World.Entities.Object.DataFields;
+using CataCraft.Core.Game.Entities.Object.DataFields;
 
-namespace CataCraft.Core.Game.World.Entities.Object;
+namespace CataCraft.Core.Game.Entities.Object;
 
 public abstract class WowObject
 {

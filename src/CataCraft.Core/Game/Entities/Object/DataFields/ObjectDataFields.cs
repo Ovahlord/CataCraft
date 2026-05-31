@@ -4,7 +4,7 @@ using System.Buffers.Binary;
 using System.Collections;
 using CataCraft.Core.Enums;
 
-namespace CataCraft.Core.Game.World.Entities.Object.DataFields;
+namespace CataCraft.Core.Game.Entities.Object.DataFields;
 
 /// <summary>
 /// Contains all gameplay related data which is being used to build object update packets.

@@ -2,8 +2,8 @@
 
 using System.Buffers;
 using CataCraft.Core.Enums;
+using CataCraft.Core.Game.Entities.Object;
 using CataCraft.Core.Game.Realm;
-using CataCraft.Core.Game.World.Entities.Object;
 using CataCraft.Core.Server.Networking;
 using CataCraft.Core.Server.Protocol.Packets.GamePackets.SubStructures;
 using CataCraft.Database.Realm;

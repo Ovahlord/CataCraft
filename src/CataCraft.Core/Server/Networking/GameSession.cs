@@ -6,8 +6,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using CataCraft.Core.Enums;
+using CataCraft.Core.Game.Entities.Player;
 using CataCraft.Core.Game.Realm;
-using CataCraft.Core.Game.World.Entities.Player;
 using CataCraft.Core.Server.Protocol;
 using CataCraft.Core.Server.Protocol.Packets;
 using CataCraft.Core.Server.Protocol.Packets.GamePackets;
@@ -28,12 +28,12 @@ public class GameSession : WowSession
     private bool ConnectionInitialized { get; set; }
     public byte[] AuthSeed { get; private set; } = RandomNumberGenerator.GetBytes(4);
     public Realm Realm { get; private set; }
+    public Player? Player { get; set; }
 
     public uint[] TutorialBits { get; private set; } = [];
     public byte[] SessionKey { get; private set; } = [];
     public byte AccountExpansionLevel { get; private set; }
     public byte ActiveExpansionLevel { get; private set; }
-    public Player? Player { get; set; }
 
     // Fields
     private PacketCrypt? _packetCrypt;

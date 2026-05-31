@@ -16,8 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Game\World\Entities\GameObject\" />
-      <Folder Include="Game\World\Entities\Item\" />
+      <Folder Include="Game\World\" />
     </ItemGroup>
 
 </Project>

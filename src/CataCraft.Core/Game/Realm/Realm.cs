@@ -28,11 +28,10 @@ public class Realm
     public byte RealmCategory { get; private set; }
     public bool LockedForNewPlayers { get; private set; }
     public bool RecommendedForNewPlayers { get; private set; }
-    public bool IsFull { get; private set; }
     public int AllowedBuild { get; private set; }
     public bool Online { get;  private set; }
     public float Population { get; private set; }
-    public World.World World { get; private set; }
+    public bool IsFull { get; private set; }
 
     // Internal fields
     private readonly TcpListener _entryConnectionListener;
@@ -52,8 +51,6 @@ public class Realm
         LockedForNewPlayers = realmDbEntry.LockedForNewPlayers;
         RecommendedForNewPlayers = realmDbEntry.RecommendedForNewPlayers;
         AllowedBuild = realmDbEntry.AllowedBuild;
-
-        World = new(this);
     }
 
     public void Open()

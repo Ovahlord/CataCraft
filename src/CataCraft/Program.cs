@@ -38,8 +38,10 @@ class Program
             }
         }
 
+        // Load realms from database
         await RealmManager.LoadRealmsAsync();
 
+        // Start Grunt connection listener
         if (ConfigManager.TryGetConfigValue("LoginIpEndpoint", out string? ipEndpoint))
         {
             TcpListener listener = new(IPEndPoint.Parse(ipEndpoint));

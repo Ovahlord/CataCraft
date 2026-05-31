@@ -2,7 +2,7 @@
 
 using System.Buffers;
 using System.Text;
-using CataCraft.Core.Game.World.Entities.Object;
+using CataCraft.Core.Game.Entities.Object;
 
 namespace CataCraft.Core.Server.Protocol.Packets;
 

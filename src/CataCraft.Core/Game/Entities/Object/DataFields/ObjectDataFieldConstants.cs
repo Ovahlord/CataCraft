@@ -2,7 +2,7 @@
 
 using CataCraft.Core.Enums;
 
-namespace CataCraft.Core.Game.World.Entities.Object.DataFields;
+namespace CataCraft.Core.Game.Entities.Object.DataFields;
 
 public static class ObjectDataFieldConstants
 {

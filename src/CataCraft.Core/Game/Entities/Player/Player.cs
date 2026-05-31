@@ -1,17 +1,16 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
 using CataCraft.Core.Enums;
-using CataCraft.Core.Game.World.Entities.Object;
+using CataCraft.Core.Game.Entities.Object;
 using CataCraft.Core.Server.Networking;
 using CataCraft.Core.Server.Protocol.Packets.GamePackets;
-using CataCraft.Database.Login;
 using CataCraft.Database.Realm;
 using CataCraft.Database.Realm.Model;
 using CataCraft.DBC;
 using CataCraft.DBC.Model;
 using Microsoft.EntityFrameworkCore;
 
-namespace CataCraft.Core.Game.World.Entities.Player;
+namespace CataCraft.Core.Game.Entities.Player;
 
 public class Player : Unit.Unit
 {
@@ -63,7 +62,7 @@ public class Player : Unit.Unit
 
     #region Properties
 
-    public GameSession? Session { get; private set; }
+    public GameSession Session { get; init; }
 
     #endregion
 
@@ -73,8 +72,9 @@ public class Player : Unit.Unit
 
     #endregion
 
-    public Player(WowGuid guid) : base(guid)
+    public Player(WowGuid guid, GameSession session) : base(guid)
     {
+        Session = session;
     }
 
     public static Player? CreatePlayerFromData(Character characterData, GameSession session)
@@ -82,7 +82,7 @@ public class Player : Unit.Unit
         if (characterData.Stats == null)
             return null;
 
-        Player player = new(new WowGuid(WowGuidType.Player, (uint)characterData.Id))
+        Player player = new(new WowGuid(WowGuidType.Player, (uint)characterData.Id), session)
         {
             Sex = (UnitSex)characterData.SexId,
             PlayerSex = (UnitSex)characterData.SexId,
@@ -107,11 +107,8 @@ public class Player : Unit.Unit
             BoundingRadius = 1f,
             CombatReach = 1f,
             HoverHeight = 1f,
-
-            Session = session
         };
 
-        session.Player = player;
         player.DataFields.SetInt32Value(EPlayerFields.PLAYER_FIELD_WATCHED_FACTION_INDEX, 0, -1);
 
         if (DBCManager.SChrRacesStore.TryGetValue(characterData.RaceId, out ChrRacesEntry? race))
@@ -129,12 +126,14 @@ public class Player : Unit.Unit
             }
         }
 
+        player.Powers.Initialize();
+
         return player;
     }
 
     public async Task SendCharacterAccountDataAsync()
     {
-        if (Session == null || !Session.IsOpen)
+        if (!Session.IsOpen)
             return;
 
         await using RealmDbContext realmDb = new();

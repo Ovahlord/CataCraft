@@ -1,14 +1,19 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
 using CataCraft.Core.Enums;
-using CataCraft.Core.Game.World.Entities.Object;
+using CataCraft.Core.Game.Entities.Object;
 
-namespace CataCraft.Core.Game.World.Entities.Unit;
+namespace CataCraft.Core.Game.Entities.Unit;
 
 public class Unit : WowObject
 {
+    // Properties
     public override bool IsWorldObject => true;
-    public Stats Stats { get; private set; } = new();
+    public Stats Stats { get; private set; }
+    public Powers Powers { get; private set; }
+    public BaseAttackTime BaseAttackTime { get; private set; }
+    public MovementSpeed MovementSpeed { get; private set; }
+    public MovementSpeedMultiplier MovementSpeedMultiplier { get; private set; }
 
     #region DataField accessors
 
@@ -66,9 +71,16 @@ public class Unit : WowObject
         set => DataFields.SetUInt8Value(EUnitFields.UNIT_FIELD_BYTES_0, 0, 1, (byte)value);
     }
 
+
     public UnitSex Sex
     {
-        get => (UnitSex)DataFields.GetUInt8Value(EUnitFields.UNIT_FIELD_BYTES_0, 0, 3);
+        get => (UnitSex)DataFields.GetUInt8Value(EUnitFields.UNIT_FIELD_BYTES_0, 0, 2);
+        set => DataFields.SetUInt8Value(EUnitFields.UNIT_FIELD_BYTES_0, 0, 3, (byte)value);
+    }
+
+    public UnitPowerType PowerType
+    {
+        get => (UnitPowerType)DataFields.GetUInt8Value(EUnitFields.UNIT_FIELD_BYTES_0, 0, 3);
         set => DataFields.SetUInt8Value(EUnitFields.UNIT_FIELD_BYTES_0, 0, 3, (byte)value);
     }
 
@@ -114,11 +126,14 @@ public class Unit : WowObject
         set => DataFields.SetUInt32Value(EUnitFields.UNIT_FIELD_FACTIONTEMPLATE, 0, value);
     }
 
-    public void SetBaseAttackTime(int time) => DataFields.SetInt32Value(EUnitFields.UNIT_FIELD_BASEATTACKTIME, 0, time);
-
     #endregion // DataField accessors
 
     public Unit(WowGuid guid) : base(guid)
     {
+        Stats = new(this);
+        Powers = new(this);
+        BaseAttackTime = new(this);
+        MovementSpeed = new(this);
+        MovementSpeedMultiplier = new(this);
     }
 }

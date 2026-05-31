@@ -3,7 +3,7 @@
 using System.Buffers.Binary;
 using CataCraft.Core.Enums;
 
-namespace CataCraft.Core.Game.World.Entities.Object
+namespace CataCraft.Core.Game.Entities.Object
 {
 
     [Flags]

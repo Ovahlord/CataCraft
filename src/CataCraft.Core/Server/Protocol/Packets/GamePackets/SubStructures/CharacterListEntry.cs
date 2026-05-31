@@ -1,7 +1,7 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
 using CataCraft.Core.Enums;
-using CataCraft.Core.Game.World.Entities.Object;
+using CataCraft.Core.Game.Entities.Object;
 
 namespace CataCraft.Core.Server.Protocol.Packets.GamePackets.SubStructures;
 

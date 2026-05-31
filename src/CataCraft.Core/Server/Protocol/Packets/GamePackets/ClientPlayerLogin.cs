@@ -3,9 +3,9 @@
 using System.Buffers;
 using System.Numerics;
 using CataCraft.Core.Enums;
-using CataCraft.Core.Game.World.Entities.Object;
-using CataCraft.Core.Game.World.Entities.Player;
-using CataCraft.Core.Game.World.Time;
+using CataCraft.Core.Game.Entities.Object;
+using CataCraft.Core.Game.Entities.Player;
+using CataCraft.Core.Game.Time;
 using CataCraft.Core.Server.Networking;
 using CataCraft.Database.Realm;
 using CataCraft.Database.Realm.Model;

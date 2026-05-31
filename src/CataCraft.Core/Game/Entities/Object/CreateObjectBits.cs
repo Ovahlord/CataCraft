@@ -1,6 +1,6 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
-namespace CataCraft.Core.Game.World.Entities.Object;
+namespace CataCraft.Core.Game.Entities.Object;
 
 public struct CreateObjectBits
 {

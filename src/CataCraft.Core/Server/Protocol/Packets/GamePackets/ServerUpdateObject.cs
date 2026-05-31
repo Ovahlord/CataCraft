@@ -1,8 +1,8 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
 using CataCraft.Core.Enums;
-using CataCraft.Core.Game.World.Entities.Object;
-using CataCraft.Core.Game.World.Entities.Unit;
+using CataCraft.Core.Game.Entities.Object;
+using CataCraft.Core.Game.Entities.Unit;
 
 namespace CataCraft.Core.Server.Protocol.Packets.GamePackets;
 
@@ -25,9 +25,9 @@ public ref struct ServerUpdateObject : IServerPacket
     }
 
     public ushort MapRecId { get; set; }
-    private List<ObjectToUpdate> _objectsToUpdate { get; set; } = [];
-    private List<ObjectToCreate> _objectsToCreate { get; set; } = [];
     public List<WowObject> ObjectsOutOfRange { get; set; } = [];
+    private readonly List<ObjectToUpdate> _objectsToUpdate = [];
+    private readonly List<ObjectToCreate> _objectsToCreate = [];
 
     public ServerUpdateObject()
     {
@@ -222,7 +222,7 @@ public ref struct ServerUpdateObject : IServerPacket
                 throw new Exception($"CreateObjectBits.MovementUpdate can only be used for Units but has been used incorrectly for WorldObject (GUID: {worldObject.Guid})");
 
             writer.WriteByteSeq(worldObject.Guid[4]);
-            writer.WriteFloat(unit.Stats.RunBackSpeed);
+            writer.WriteFloat(unit.MovementSpeed[MovementType.RunBack]);
 
             if (worldObject.MovementStatus.Fall != null)
             {
@@ -237,7 +237,7 @@ public ref struct ServerUpdateObject : IServerPacket
                 writer.WriteFloat(worldObject.MovementStatus.Fall.JumpVelocity);
             }
 
-            writer.WriteFloat(unit.Stats.SwimBackSpeed);
+            writer.WriteFloat(unit.MovementSpeed[MovementType.SwimBack]);
 
             // if (hasSplineElevation)
             //     WriteFloat(worldObject.MovementStatus.StepUpStartElevation);
@@ -275,38 +275,38 @@ public ref struct ServerUpdateObject : IServerPacket
             }
 
             writer.WriteFloat(worldObject.MovementStatus.Position.X);
-            writer.WriteFloat(unit.Stats.PitchRate);
+            writer.WriteFloat(unit.MovementSpeed[MovementType.PitchRate]);
 
             writer.WriteByteSeq(worldObject.Guid[3]);
             writer.WriteByteSeq(worldObject.Guid[0]);
 
-            writer.WriteFloat(unit.Stats.SwimSpeed);
+            writer.WriteFloat(unit.MovementSpeed[MovementType.Swim]);
             writer.WriteFloat(worldObject.MovementStatus.Position.Y);
 
             writer.WriteByteSeq(worldObject.Guid[7]);
             writer.WriteByteSeq(worldObject.Guid[1]);
             writer.WriteByteSeq(worldObject.Guid[2]);
 
-            writer.WriteFloat(unit.Stats.WalkSpeed);
+            writer.WriteFloat(unit.MovementSpeed[MovementType.Walk]);
 
             if (worldObject.MovementStatus.MoveTime != 0)
                 writer.WriteUInt32(worldObject.MovementStatus.MoveTime);
 
-            writer.WriteFloat(unit.Stats.TurnRate);
+            writer.WriteFloat(unit.MovementSpeed[MovementType.TurnRate]);
 
             writer.WriteByteSeq(worldObject.Guid[6]);
 
-            writer.WriteFloat(unit.Stats.FlightSpeed);
+            writer.WriteFloat(unit.MovementSpeed[MovementType.Flight]);
 
             if (worldObject.MovementStatus.Facing != 0f)
                 writer.WriteFloat(worldObject.MovementStatus.Facing);
 
-            writer.WriteFloat(unit.Stats.RunSpeed);
+            writer.WriteFloat(unit.MovementSpeed[MovementType.Run]);
 
             // if (Has pitch)
                 //WriteFloat(worldObject.MovementStatus.Pitch);
 
-            writer.WriteFloat(unit.Stats.FlightBackSpeed);
+            writer.WriteFloat(unit.MovementSpeed[MovementType.FlightBack]);
         }
 
         if (createObjectBits.Vehicle)

@@ -2,7 +2,7 @@
 
 using System.Buffers;
 using CataCraft.Core.Enums;
-using CataCraft.Core.Game.World.Entities.Object;
+using CataCraft.Core.Game.Entities.Object;
 using CataCraft.Core.Server.Networking;
 
 namespace CataCraft.Core.Server.Protocol.Packets.GamePackets;
