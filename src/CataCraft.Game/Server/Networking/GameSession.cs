@@ -11,11 +11,10 @@ using CataCraft.Database.Login;
 using CataCraft.Database.Login.Model;
 using CataCraft.Game.Entities.Player;
 using CataCraft.Game.Enums;
-using CataCraft.Game.Game.Realm;
-using CataCraft.Game.Game.Realm.World.Map;
 using CataCraft.Game.Server.Protocol;
 using CataCraft.Game.Server.Protocol.Packets.GamePackets;
 using CataCraft.Game.Server.Protocol.Packets.GamePackets.SubStructures;
+using CataCraft.Game.World.Map;
 using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Game.Server.Networking;
@@ -29,9 +28,8 @@ public class GameSession : WowSession
     public bool PacketCryptInitialized => _packetCrypt != null;
     private bool ConnectionInitialized { get; set; }
     public byte[] AuthSeed { get; private set; } = RandomNumberGenerator.GetBytes(4);
-    public Realm Realm { get; private set; }
+    public Realm.Realm Realm { get; private set; }
     public Player? Player { get; set; }
-    public MapInstance? MapInstance { get; set; }
 
     public uint[] TutorialBits { get; private set; } = [];
     public byte[] SessionKey { get; private set; } = [];
@@ -44,7 +42,7 @@ public class GameSession : WowSession
     private readonly byte[] _encryptSeed = RandomNumberGenerator.GetBytes(16);
     private readonly byte[] _decryptSeed = RandomNumberGenerator.GetBytes(16);
 
-    public GameSession(TcpClient client, Realm realm) : base(client)
+    public GameSession(TcpClient client, Realm.Realm realm) : base(client)
     {
         Realm = realm;
     }

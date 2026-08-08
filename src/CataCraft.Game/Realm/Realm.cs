@@ -2,16 +2,11 @@
 
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Channels;
-using CataCraft.Database.Login;
-using CataCraft.Database.Realm;
-using CataCraft.Database.Realm.Model;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Networking;
 using CataCraft.Game.Server.Protocol.Packets.GamePackets;
-using Microsoft.EntityFrameworkCore;
 
-namespace CataCraft.Game.Game.Realm;
+namespace CataCraft.Game.Realm;
 
 /// <summary>
 /// The primary entry point to the world. It manages social features and controls the creation and management of

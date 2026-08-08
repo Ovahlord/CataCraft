@@ -3,7 +3,7 @@
 using System.Buffers;
 using CataCraft.Database.Realm;
 using CataCraft.Game.Enums;
-using CataCraft.Game.Game.Realm;
+using CataCraft.Game.Realm;
 using CataCraft.Game.Server.Networking;
 using CataCraft.Game.Server.Protocol.Packets.GruntPackets.SubStructures;
 

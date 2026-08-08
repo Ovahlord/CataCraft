@@ -3,16 +3,16 @@
 using System.Collections.Concurrent;
 using CataCraft.DBC;
 using CataCraft.DBC.Model;
-using CataCraft.Game.Game.Realm.World.Map;
+using CataCraft.Game.World.Map;
 
-namespace CataCraft.Game.Game.Realm.World;
+namespace CataCraft.Game.World;
 
 public class World
 {
-    private readonly Realm _realm;
+    private readonly Realm.Realm _realm;
     private readonly ConcurrentDictionary<int, MapInstance> _instances = [];
 
-    public World(Realm realm)
+    public World(Realm.Realm realm)
     {
         _realm = realm;
     }

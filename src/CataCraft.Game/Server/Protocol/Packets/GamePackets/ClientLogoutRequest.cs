@@ -7,6 +7,8 @@ namespace CataCraft.Game.Server.Protocol.Packets.GamePackets;
 
 public ref struct ClientLogoutRequest
 {
+    private const int DefaultLogoutDelay = 20000; // Hardcoded in client
+
     public ClientLogoutRequest(ReadOnlySequence<byte> _)
     {
     }
@@ -16,12 +18,13 @@ public ref struct ClientLogoutRequest
         ServerLogoutResponse serverLogoutResponse = new();
         session.EnqueuePacket(ref serverLogoutResponse);
 
-        if (session.Player == null || session.MapInstance == null)
+        if (session.Player == null || session.Player.MapInstance == null)
             return;
 
-        await Task.Delay(20000);
+        await Task.Delay(DefaultLogoutDelay);
 
-        session.MapInstance?.RemoveWowObject(session.Player);
+        session.Player.MapInstance.RemoveWowObject(session.Player);
+        session.Player.MapInstance = null;
         session.Player = null;
 
         ServerLogoutComplete serverLogoutComplete = new();

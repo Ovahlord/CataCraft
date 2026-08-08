@@ -5,8 +5,8 @@ using CataCraft.Database.Realm;
 using CataCraft.Database.Realm.Model;
 using CataCraft.Game.Entities.Object;
 using CataCraft.Game.Entities.Player;
-using CataCraft.Game.Game.Realm.World.Map;
 using CataCraft.Game.Server.Networking;
+using CataCraft.Game.World.Map;
 using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Game.Server.Protocol.Packets.GamePackets;
@@ -88,8 +88,15 @@ public ref struct ClientPlayerLogin
             Console.WriteLine("Picked up existing player object for login");
         }
 
+        if (!instance.AddWowObject(player))
+        {
+            session.Close();
+            return;
+        }
+
         player.Session = session;
-        session.MapInstance = instance;
+        session.Player = player;
+        session.Player.MapInstance = instance;
 
         // Player has been successfully added to the map instance. Verify world login
         ServerLoginVerifiyWorld loginVerifyWorld = new(player.MovementStatus.Position, player.MovementStatus.Facing, characterDbData.Stats.MapId);
@@ -106,11 +113,6 @@ public ref struct ClientPlayerLogin
         ServerFeatureSystemStatus featureSystemStatus = new();
         session.EnqueuePacket(ref featureSystemStatus);
 
-        if (!instance.AddWowObject(player))
-        {
-            session.Close();
-            return;
-        }
 
         // Login was successful - link the player entities to the session
         session.Player = player;

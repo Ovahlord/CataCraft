@@ -2,6 +2,7 @@
 
 using CataCraft.Game.Entities.Object.DataFields;
 using CataCraft.Game.Enums;
+using CataCraft.Game.World.Map;
 
 namespace CataCraft.Game.Entities.Object;
 
@@ -11,6 +12,7 @@ public abstract class WowObject
     public ObjectDataFields DataFields { get; private set; } = new();
     public MovementStatus MovementStatus { get; private set; } = new();
     public virtual bool IsWorldObject => false;
+    public MapInstance? MapInstance { get; set; }
     public bool IsNewObject { get; set; }
 
     protected WowObject(WowGuid guid)

@@ -9,7 +9,7 @@ using CataCraft.Game.Entities.Player;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Protocol.Packets.GamePackets;
 
-namespace CataCraft.Game.Game.Realm.World.Map;
+namespace CataCraft.Game.World.Map;
 
 public class MapInstance
 {
@@ -91,7 +91,7 @@ public class MapInstance
     {
         foreach (Player player in _playerObjects.Values)
         {
-            if (player.Session == null || player.Session.MapInstance != this)
+            if (player.Session == null || player.MapInstance != this)
                 continue;
 
             // There is nothing to update right now

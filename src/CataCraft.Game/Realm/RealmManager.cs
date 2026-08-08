@@ -2,7 +2,7 @@
 
 using CataCraft.Database.Realm;
 
-namespace CataCraft.Game.Game.Realm;
+namespace CataCraft.Game.Realm;
 
 public static class RealmManager
 {

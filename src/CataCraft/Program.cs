@@ -1,11 +1,10 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using CataCraft.Core;
 using CataCraft.Core.Configuration;
 using CataCraft.Core.Cryptography;
-using CataCraft.Game.Game.Realm;
 using CataCraft.Database;
 using CataCraft.DBC;
+using CataCraft.Game.Realm;
 using CataCraft.Game.Server.Networking;
 
 namespace CataCraft;
