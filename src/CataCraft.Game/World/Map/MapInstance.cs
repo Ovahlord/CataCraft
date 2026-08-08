@@ -13,13 +13,17 @@ namespace CataCraft.Game.World.Map;
 
 public class MapInstance
 {
-    private const float DefaultUpdateTickRate = 2.5f;
-    private const float DefaultHeartbeatRate = 0.2f;
+    public int MapRecId => (int)_mapEntry.ID;
+
+    private const float DefaultSimulationTickRate = 20f;
+    private const float DefaultObjectUpdateRate = 2.5f;
+    private const float DefaultHeartbeatTickRate = 0.2f;
 
     private readonly CancellationTokenSource _cts = new();
     private readonly MapEntry _mapEntry;
-    private readonly float _updateTickRate;
-    private readonly float _heartbeatRate;
+    private readonly float _simulationTickRate;
+    private readonly float _objectUpdateTickRate;
+    private readonly float _heartbeatTickRate;
 
     private readonly ConcurrentDictionary<WowGuid, WowObject> _wowObjects = [];
     private readonly ConcurrentDictionary<WowGuid, Player> _playerObjects = [];
@@ -28,15 +32,20 @@ public class MapInstance
     {
         _mapEntry = mapEntry;
 
-        if (AppSettings.TryGetConfigValue("MapSettings", "UpdateTickRate", out float tickRate) && tickRate > 0f)
-            _updateTickRate = tickRate;
+        if (AppSettings.TryGetConfigValue("MapSettings", "SimulationTickRate", out float simulationTickRate) && simulationTickRate > 0f)
+            _simulationTickRate = simulationTickRate;
         else
-            _updateTickRate = DefaultUpdateTickRate;
+            _simulationTickRate = DefaultSimulationTickRate;
 
-        if (AppSettings.TryGetConfigValue("MapSettings", "UpdateTickRate", out float heartbeatRate) && heartbeatRate > 0f)
-            _heartbeatRate = heartbeatRate;
+        if (AppSettings.TryGetConfigValue("MapSettings", "ObjectUpdateTickRate", out float objectUpdateTickRate) && objectUpdateTickRate > 0f)
+            _objectUpdateTickRate = objectUpdateTickRate;
         else
-            _heartbeatRate = DefaultHeartbeatRate;
+            _objectUpdateTickRate = DefaultObjectUpdateRate;
+
+        if (AppSettings.TryGetConfigValue("MapSettings", "HeartbeatTickRate", out float heartbeatTickRate) && heartbeatTickRate > 0f)
+            _heartbeatTickRate = heartbeatTickRate;
+        else
+            _heartbeatTickRate = DefaultHeartbeatTickRate;
 
         _ = UpdateAsync(_cts.Token);
     }
@@ -71,23 +80,49 @@ public class MapInstance
 
     private async Task UpdateAsync(CancellationToken token = default)
     {
-        Task heartbeatTask = Task.Delay((int)(1000 / _heartbeatRate), token);
-
-        while (!token.IsCancellationRequested)
+        try
         {
-            await Task.Delay((int)(1000 / _updateTickRate), token);
+            Task heartbeatTask = Task.Delay((int)(1000 / _heartbeatTickRate), token);
+            Task updateUpdateTask = Task.Delay((int)(1000 / _objectUpdateTickRate), token);
 
-            // Perform all actions which should occur only once per heartbeat
-            if (heartbeatTask.IsCompleted)
+            while (!token.IsCancellationRequested)
             {
-                heartbeatTask = Task.Delay((int)(1000 / _heartbeatRate), token);
-            }
+                await Task.Delay((int)(1000 / _simulationTickRate), token);
+                // Update all world object entities
+                foreach (WowObject wowObject in _wowObjects.Values)
+                {
+                    wowObject.Update();
+                }
 
-            UpdateObjects();
+                // Perform all actions which should occur only once per heartbeat
+                if (heartbeatTask.IsCompleted)
+                {
+                    foreach (WowObject wowObject in _wowObjects.Values)
+                    {
+                        wowObject.Heartbeat();
+                    }
+
+                    heartbeatTask = Task.Delay((int)(1000 / _heartbeatTickRate), token);
+                }
+
+                // Send SMSG_UPDATE_OBJECT to all players
+                if (updateUpdateTask.IsCompleted)
+                {
+                    SendObjectUpdates();
+                    updateUpdateTask = Task.Delay((int)(1000 / _objectUpdateTickRate), token);
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
         }
     }
 
-    private void UpdateObjects()
+    private void SendObjectUpdates()
     {
         foreach (Player player in _playerObjects.Values)
         {

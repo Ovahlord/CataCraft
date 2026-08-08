@@ -55,6 +55,7 @@ public ref struct ClientPlayerLogin
             .Where(c => c.Id == playerGuid.Counter
                         && c.RealmId == session.Realm.RealmId
                         && c.GameAccountId == session.GameAccountId)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
 
         if (characterDbData == null || characterDbData.Stats == null)
@@ -99,28 +100,51 @@ public ref struct ClientPlayerLogin
         session.Player.MapInstance = instance;
 
         // Player has been successfully added to the map instance. Verify world login
-        ServerLoginVerifiyWorld loginVerifyWorld = new(player.MovementStatus.Position, player.MovementStatus.Facing, characterDbData.Stats.MapId);
-        session.EnqueuePacket(ref loginVerifyWorld);
+        SendLoginVerifyWorld(session, player);
 
-        ServerAccountDataTimes accountDataTimes = new(characterDbData.CharacterData);
-        session.EnqueuePacket(ref accountDataTimes);
+        // Send the per-character data times
+        SendCharacterDataTimes(session,  characterDbData);
 
+        // Send the tutorial flags
         SendTutorialFlags(session);
 
-        ServerLoginSetTimeSpeed loginSetTimeSpeed = new();
-        session.EnqueuePacket(ref loginSetTimeSpeed);
+        // Set the game time speed
+        SendSetTimeSpeed(session);
 
-        ServerFeatureSystemStatus featureSystemStatus = new();
-        session.EnqueuePacket(ref featureSystemStatus);
+        // Send the feature status
+        SendFeatureSystemStatus(session);
+    }
 
+    private static void SendLoginVerifyWorld(GameSession session, Player player)
+    {
+        if (player.MapInstance == null)
+            return;
 
-        // Login was successful - link the player entities to the session
-        session.Player = player;
+        ServerLoginVerifiyWorld loginVerifyWorld = new(player.MovementStatus.Position, player.MovementStatus.Facing, player.MapInstance.MapRecId);
+        session.EnqueuePacket(ref loginVerifyWorld);
+    }
+
+    private static void SendCharacterDataTimes(GameSession session, Character characterData)
+    {
+        ServerAccountDataTimes accountDataTimes = new(characterData.CharacterData);
+        session.EnqueuePacket(ref accountDataTimes);
     }
 
     private static void SendTutorialFlags(GameSession session)
     {
         ServerTutorialFlags serverTutorialFlags = new(session.TutorialBits);
         session.EnqueuePacket(ref serverTutorialFlags);
+    }
+
+    private static void SendSetTimeSpeed(GameSession session)
+    {
+        ServerLoginSetTimeSpeed loginSetTimeSpeed = new();
+        session.EnqueuePacket(ref loginSetTimeSpeed);
+    }
+
+    private static void SendFeatureSystemStatus(GameSession session)
+    {
+        ServerFeatureSystemStatus featureSystemStatus = new();
+        session.EnqueuePacket(ref featureSystemStatus);
     }
 }

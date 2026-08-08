@@ -11,7 +11,7 @@ using CataCraft.Game.Server.Networking;
 
 namespace CataCraft.Game.Entities.Player;
 
-public class Player : Unit.Unit
+public sealed class Player : Unit.Unit
 {
     #region DataField accessors
 
@@ -127,5 +127,15 @@ public class Player : Unit.Unit
 
         player.Powers.Initialize();
         return true;
+    }
+
+    public override void Update()
+    {
+        base.Update();
+    }
+
+    public override void Heartbeat()
+    {
+        base.Heartbeat();
     }
 }

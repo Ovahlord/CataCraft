@@ -136,4 +136,12 @@ public class Unit : WowObject
         MovementSpeed = new(this);
         MovementSpeedMultiplier = new(this);
     }
+
+    public override void Update()
+    {
+    }
+
+    public override void Heartbeat()
+    {
+    }
 }

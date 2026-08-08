@@ -31,4 +31,7 @@ public abstract class WowObject
 
         DataFields.SetUInt64Value(EObjectFields.OBJECT_FIELD_GUID, guid);
     }
+
+    public abstract void Update();
+    public abstract void Heartbeat();
 }
