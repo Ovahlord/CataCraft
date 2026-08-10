@@ -1,9 +1,0 @@
-// This file is part of the CataCraft project, which is published under the MIT license.
-
-namespace CataCraft.Game.Server.Protocol.Packets.GamePackets.SubStructures;
-
-public sealed class RestrictedFactionChangeRule
-{
-    public int Mask { get; set; }
-    public byte RaceID { get; set; }
-}
