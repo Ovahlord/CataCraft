@@ -1,5 +1,4 @@
 using CataCraft.DBC.Attributes;
-using DBCD.IO.Attributes;
 
 namespace CataCraft.DBC.Model;
 

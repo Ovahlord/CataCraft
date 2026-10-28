@@ -17,7 +17,7 @@ public static class Program
         AppSettings.LoadConfiguration();
 
         // Load DBC files
-        DBCManager.LoadStorages();
+        await DBCManager.LoadStoragesAsync();
 
         // Set up database if needed
         if (await DatabaseManager.InitializeDatabasesAsync())

@@ -1,5 +1,4 @@
 using CataCraft.DBC.Attributes;
-using DBCD.IO.Attributes;
 
 namespace CataCraft.DBC.Model;
 
@@ -8,8 +7,6 @@ public sealed class SpellAuraRestrictionsEntry
 {
     [Index(true)]
     public uint ID;
-    public int SpellID;
-    public int DifficultyID;
     public int CasterAuraState;
     public int TargetAuraState;
     public int ExcludeCasterAuraState;
