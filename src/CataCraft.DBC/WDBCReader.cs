@@ -30,18 +30,18 @@ public static class WDBCReader
         int recordCount = reader.ReadInt32();
         /*int fieldCount =*/ reader.ReadInt32();
         int recordSize = reader.ReadInt32();
-        int stringBlockSize = reader.ReadInt32();
+        int stringTableSize = reader.ReadInt32();
 
         if (recordCount == 0)
             return;
 
         // Parse the string table first
-        Dictionary<int, string> stringTable = new(stringBlockSize / 0x20);
-        if (stringBlockSize > 0)
+        Dictionary<int, string> stringTable = new(stringTableSize / 0x20);
+        if (stringTableSize > 0)
         {
             long position = stream.Position;
             stream.Position += recordCount * recordSize;
-            await ParseStringTableAsync(stream, stringTable, stringBlockSize, token);
+            await ParseStringTableAsync(stream, stringTable, stringTableSize, token);
             stream.Position = position;
         }
 
@@ -59,18 +59,17 @@ public static class WDBCReader
             int position = 0;
             Span<byte> data = stringTableBuffer.AsSpan(0, stringBlockSize);
 
-            int i = 0;
             while (position < data.Length)
             {
                 int index = data.Slice(position).IndexOf((byte)0);
                 if (index != -1) // Found a null terminator
                 {
-                    stringTable.Add(i++, Encoding.UTF8.GetString(data.Slice(position, index)));
+                    stringTable.Add(position, Encoding.UTF8.GetString(data.Slice(position, index)));
                     position += index + 1;
                 }
                 else // No further null terminators found - parse the remaining data as string
                 {
-                    stringTable.Add(i, Encoding.UTF8.GetString(data.Slice(position)));
+                    stringTable.Add(position, Encoding.UTF8.GetString(data.Slice(position)));
                     break;
                 }
             }
