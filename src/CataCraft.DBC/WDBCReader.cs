@@ -30,96 +30,57 @@ public static class WDBCReader
         int recordCount = reader.ReadInt32();
         /*int fieldCount =*/ reader.ReadInt32();
         int recordSize = reader.ReadInt32();
-        int stringTableSize = reader.ReadInt32();
+        int stringBlockSize = reader.ReadInt32();
 
         if (recordCount == 0)
             return;
 
-        // Parse the string table first
-        Dictionary<int, string> stringTable = new(stringTableSize / 0x20);
-        if (stringTableSize > 0)
-        {
-            long position = stream.Position;
-            stream.Position += recordCount * recordSize;
-            await ParseStringTableAsync(stream, stringTable, stringTableSize, token);
-            stream.Position = position;
-        }
+        byte[] recordBuffer = ArrayPool<byte>.Shared.Rent(recordSize * recordCount);
+        byte[] stringBlockBuffer = ArrayPool<byte>.Shared.Rent(stringBlockSize);
 
-        // Parse the records
-        await ParseRecordsAsync(stream, storage, stringTable, recordCount, recordSize, token);
-    }
-
-    private static async Task ParseStringTableAsync(Stream stream, Dictionary<int, string> stringTable, int stringBlockSize, CancellationToken token = default)
-    {
-        byte[] stringTableBuffer = ArrayPool<byte>.Shared.Rent(stringBlockSize);
         try
         {
-            await stream.ReadExactlyAsync(stringTableBuffer, 0, stringBlockSize, token);
-
-            int position = 0;
-            Span<byte> data = stringTableBuffer.AsSpan(0, stringBlockSize);
-
-            while (position < data.Length)
-            {
-                int index = data.Slice(position).IndexOf((byte)0);
-                if (index != -1) // Found a null terminator
-                {
-                    stringTable.Add(position, Encoding.UTF8.GetString(data.Slice(position, index)));
-                    position += index + 1;
-                }
-                else // No further null terminators found - parse the remaining data as string
-                {
-                    stringTable.Add(position, Encoding.UTF8.GetString(data.Slice(position)));
-                    break;
-                }
-            }
-
-        }
-        finally
-        {
-            ArrayPool<byte>.Shared.Return(stringTableBuffer);
-        }
-    }
-
-    private static async Task ParseRecordsAsync<T>(Stream stream, IDictionary<int, T> storage, Dictionary<int, string> stringTable, int recordCount, int recordSize, CancellationToken token = default) where T : new()
-    {
-        byte[] recordBuffer = ArrayPool<byte>.Shared.Rent(recordCount * recordSize);
-        try
-        {
-            // Read the raw record data first and slice it into record sized pieces
             await stream.ReadExactlyAsync(recordBuffer, 0, recordSize * recordCount, token);
+            await stream.ReadExactlyAsync(stringBlockBuffer, 0, stringBlockSize, token);
 
-            // Slice the memory into single record pieces
-            ReadOnlyMemory<byte> data = recordBuffer.AsMemory(0, recordSize * recordCount);
+            ReadOnlyMemory<byte> recordData = recordBuffer.AsMemory(0, recordSize * recordCount);
+            ReadOnlyMemory<byte> stringBlockData = stringBlockBuffer.AsMemory(0, stringBlockSize);
 
-            // Extract the properties
-            FieldInfo[] fields = typeof(T).GetFields();
-            FieldInfo? indexField = fields.FirstOrDefault(p => p.GetCustomAttribute<IndexAttribute>() != null);
-            if (indexField == null)
-                throw new InvalidDataException($"The Record type {typeof(T).Name} doesn't have any index specified");
-
-            int[] cardinalities = new int[fields.Length];
-            for (int i = 0; i < fields.Length; i++)
-                cardinalities[i] = fields[i].GetCustomAttribute<CardinalityAttribute>()?.Count ?? 0;
-
-            // Parse the records into our data structure
-            Parallel.For(0, recordCount, i =>
-            {
-                ReadOnlySpan<byte> dataSpan = data.Span.Slice(i * recordSize, recordSize);
-
-                T record = new();
-                int index = DeserializeRecord(record, dataSpan, fields, indexField, cardinalities, stringTable);
-                lock (storage)
-                    storage.Add(index, record);
-            });
+            // Parse the records
+            await ParseRecordsAsync(storage, recordData, stringBlockData, recordCount, recordSize, token);
         }
         finally
         {
             ArrayPool<byte>.Shared.Return(recordBuffer);
+            ArrayPool<byte>.Shared.Return(stringBlockBuffer);
         }
     }
 
-    private static int DeserializeRecord<T>(T record, ReadOnlySpan<byte> rawRecord, FieldInfo[] fields, FieldInfo? indexField, int[] cardinalities, Dictionary<int, string> stringTable)
+    private static async Task ParseRecordsAsync<T>(IDictionary<int, T> storage, ReadOnlyMemory<byte> recordData, ReadOnlyMemory<byte> stringBlockData, int recordCount, int recordSize, CancellationToken token = default) where T : new()
+    {
+        // Extract the properties
+        FieldInfo[] fields = typeof(T).GetFields();
+        FieldInfo? indexField = fields.FirstOrDefault(p => p.GetCustomAttribute<IndexAttribute>() != null);
+        if (indexField == null)
+            throw new InvalidDataException($"The Record type {typeof(T).Name} doesn't have any index specified");
+
+        int[] cardinalities = new int[fields.Length];
+        for (int i = 0; i < fields.Length; i++)
+            cardinalities[i] = fields[i].GetCustomAttribute<CardinalityAttribute>()?.Count ?? 0;
+
+        // Parse the records into our data structure
+        Parallel.For(0, recordCount, i =>
+        {
+            ReadOnlySpan<byte> rawRecord = recordData.Span.Slice(i * recordSize, recordSize);
+
+            T record = new();
+            int index = DeserializeRecord(record, rawRecord, stringBlockData.Span, fields, indexField, cardinalities);
+            lock (storage)
+                storage.Add(index, record);
+        });
+    }
+
+    private static int DeserializeRecord<T>(T record, ReadOnlySpan<byte> rawRecord, ReadOnlySpan<byte> stringBlockData, FieldInfo[] fields, FieldInfo? indexField, int[] cardinalities)
     {
         int position = 0;
         int index = 0;
@@ -141,7 +102,7 @@ public static class WDBCReader
                 Array dataArray = Array.CreateInstance(elementType, cardinalities[i]);
                 for (int x = 0; x < dataArray.Length; ++x)
                 {
-                    object? arrayFieldValue = ReadFieldValue(rawRecord, ref position, elementType, stringTable);
+                    object? arrayFieldValue = ReadFieldValue(rawRecord, stringBlockData, ref position, elementType);
                     dataArray.SetValue(arrayFieldValue, x);
                 }
 
@@ -149,7 +110,7 @@ public static class WDBCReader
             }
 
             // Regular field parsing
-            object? fieldValue =  ReadFieldValue(rawRecord, ref position, field.FieldType, stringTable);
+            object? fieldValue =  ReadFieldValue(rawRecord, stringBlockData, ref position, field.FieldType);
             field.SetValue(record, fieldValue);
 
             if (field == indexField)
@@ -164,7 +125,7 @@ public static class WDBCReader
         return index;
     }
 
-    private static object? ReadFieldValue(ReadOnlySpan<byte> rawRecord, ref int position, Type fieldType, Dictionary<int, string> stringTable)
+    private static object? ReadFieldValue(ReadOnlySpan<byte> rawRecord, ReadOnlySpan<byte> stringBlockData, ref int position, Type fieldType)
     {
         if (fieldType == typeof(byte))
         {
@@ -239,9 +200,15 @@ public static class WDBCReader
         if (fieldType == typeof(string))
         {
             // String fields hold an offset into the string table
-            int value = BinaryPrimitives.ReadInt32LittleEndian(rawRecord.Slice(position, sizeof(int)));
+            int stringBlockPosition = BinaryPrimitives.ReadInt32LittleEndian(rawRecord.Slice(position, sizeof(int)));
             position += sizeof(int);
-            return stringTable.GetValueOrDefault(value, string.Empty);
+
+            ReadOnlySpan<byte> stringSegment = stringBlockData.Slice(stringBlockPosition);
+            int nullTerminatorIndex = stringSegment.IndexOf((byte)0);
+            if (nullTerminatorIndex != -1)
+                return Encoding.UTF8.GetString(stringSegment.Slice(0, nullTerminatorIndex));
+
+            return Encoding.UTF8.GetString(stringSegment);
         }
 
         return null;
