@@ -11,7 +11,7 @@ public abstract class WowObject : MirroredObject
     public WowGuid Guid
     {
         get => GetUInt64Value(EObjectFields.OBJECT_FIELD_GUID);
-        private set => SetUInt64Value(EObjectFields.OBJECT_FIELD_GUID, value);
+        private init => SetUInt64Value(EObjectFields.OBJECT_FIELD_GUID, value);
     }
 
     public TypeMask ObjectType
