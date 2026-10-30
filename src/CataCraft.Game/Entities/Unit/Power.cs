@@ -8,7 +8,7 @@ namespace CataCraft.Game.Entities.Unit;
 
 public class Power
 {
-    private readonly Unit _owner;
+    private readonly UnitBase _owner;
     private readonly int  _powerIndex;
 
     public PowerType PowerType { get; private set; }
@@ -47,7 +47,7 @@ public class Power
         }
     }
 
-    public Power(Unit owner, int powerIndex, PowerType powerType)
+    public Power(UnitBase owner, int powerIndex, PowerType powerType)
     {
         _owner = owner;
         _powerIndex =  powerIndex;
@@ -64,32 +64,32 @@ public class Power
 
     public int MaxValue
     {
-        get => _owner.DataFields.GetInt32Value(EUnitFields.UNIT_FIELD_MAXPOWER1, _powerIndex);
-        set => _owner.DataFields.SetInt32Value(EUnitFields.UNIT_FIELD_MAXPOWER1, _powerIndex, Math.Max(value, MinValue));
+        get => _owner.GetInt32Value(EUnitFields.UNIT_FIELD_MAXPOWER1, _powerIndex);
+        set => _owner.SetInt32Value(EUnitFields.UNIT_FIELD_MAXPOWER1, _powerIndex, Math.Max(value, MinValue));
     }
 
     public int Value
     {
-        get => _owner.DataFields.GetInt32Value(EUnitFields.UNIT_FIELD_POWER1, _powerIndex);
-        set => _owner.DataFields.SetInt32Value(EUnitFields.UNIT_FIELD_POWER1, _powerIndex, Math.Clamp(value, MinValue, MaxValue));
+        get => _owner.GetInt32Value(EUnitFields.UNIT_FIELD_POWER1, _powerIndex);
+        set => _owner.SetInt32Value(EUnitFields.UNIT_FIELD_POWER1, _powerIndex, Math.Clamp(value, MinValue, MaxValue));
     }
 
     public int RegenFlatModifier
     {
-        get => _owner.DataFields.GetInt32Value(EUnitFields.UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, _powerIndex);
-        set => _owner.DataFields.SetInt32Value(EUnitFields.UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, _powerIndex, value);
+        get => _owner.GetInt32Value(EUnitFields.UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, _powerIndex);
+        set => _owner.SetInt32Value(EUnitFields.UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, _powerIndex, value);
     }
 
     public int RegenInterruptedFlatModifier
     {
-        get => _owner.DataFields.GetInt32Value(EUnitFields.UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, _powerIndex);
-        set => _owner.DataFields.SetInt32Value(EUnitFields.UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, _powerIndex, value);
+        get => _owner.GetInt32Value(EUnitFields.UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, _powerIndex);
+        set => _owner.SetInt32Value(EUnitFields.UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, _powerIndex, value);
     }
 
     public float HasteRegenModifier
     {
-        get => _owner.DataFields.GetFloatValue(EPlayerFields.PLAYER_FIELD_MOD_HASTE_REGEN, _powerIndex);
-        set => _owner.DataFields.SetFloatValue(EPlayerFields.PLAYER_FIELD_MOD_HASTE_REGEN, _powerIndex, value);
+        get => _owner.GetFloatValue(EPlayerFields.PLAYER_FIELD_MOD_HASTE_REGEN, _powerIndex);
+        set => _owner.SetFloatValue(EPlayerFields.PLAYER_FIELD_MOD_HASTE_REGEN, _powerIndex, value);
     }
 
     public void UpdateMinMaxPower()
@@ -150,7 +150,7 @@ public class Power
     {
         int key = (int)_owner.Class * 100 + _owner.Level - 1;
         if (DBCManager.SgtOCTBaseMPByClassStore.TryGetValue(key, out gtOCTBaseMPByClassEntry? entry))
-            _owner.DataFields.SetInt32Value(EUnitFields.UNIT_FIELD_BASE_MANA, 0, (int)entry.Data);
+            _owner.SetInt32Value(EUnitFields.UNIT_FIELD_BASE_MANA, 0, (int)entry.Data);
     }
 
     private int CalculateManaBonusFromIntellect()

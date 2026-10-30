@@ -9,9 +9,9 @@ namespace CataCraft.Game.Entities.Unit;
 public sealed class Powers
 {
     private readonly Dictionary<PowerType, Power> _powers = [];
-    private readonly Unit _owner;
+    private readonly UnitBase _owner;
 
-    public Powers(Unit owner)
+    public Powers(UnitBase owner)
     {
         _owner = owner;
     }
@@ -38,6 +38,4 @@ public sealed class Powers
             ++powerIndex;
         }
     }
-
-
 }

@@ -1,35 +1,40 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
-using CataCraft.Game.Entities.Object.DataFields;
 using CataCraft.Game.Enums;
-using CataCraft.Game.World.Map;
 
 namespace CataCraft.Game.Entities.Object;
 
-public abstract class WowObject
+public abstract class WowObject : MirroredObject
 {
-    public WowGuid Guid { get; private set; }
-    public ObjectDataFields DataFields { get; private set; } = new();
-    public MovementStatus MovementStatus { get; private set; } = new();
-    public virtual bool IsWorldObject => false;
-    public MapInstance? MapInstance { get; set; }
+    #region Update Field Accessors
+
+    public WowGuid Guid
+    {
+        get => GetUInt64Value(EObjectFields.OBJECT_FIELD_GUID);
+        private set => SetUInt64Value(EObjectFields.OBJECT_FIELD_GUID, value);
+    }
+
+    public TypeMask ObjectType
+    {
+        get => (TypeMask)GetUInt16Value(EObjectFields.OBJECT_FIELD_TYPE);
+        init => SetUInt16Value(EObjectFields.OBJECT_FIELD_TYPE, 0, 0, (ushort)value);
+    }
+
+    public float ScaleX
+    {
+        get => GetFloatValue(EObjectFields.OBJECT_FIELD_SCALE_X);
+        set => SetFloatValue(EObjectFields.OBJECT_FIELD_SCALE_X, 0, value);
+    }
+
+    #endregion // Update Field Accessors
+
     public bool IsNewObject { get; set; }
 
-    protected WowObject(WowGuid guid)
+    protected WowObject(WowGuid guid, int updateFieldCount, DataFieldVisibilityFlags[] updateFieldVisibilityFlags) : base(updateFieldCount, updateFieldVisibilityFlags)
     {
         Guid = guid;
-        if (Guid.IsPlayer)
-        {
-            DataFields.InitializePlayerFields();
-            DataFields.SetUInt32Value(EObjectFields.OBJECT_FIELD_TYPE, 0, 65561);
-            DataFields.SetFloatValue(EObjectFields.OBJECT_FIELD_SCALE_X, 0, 1);
-        }
-        else if (Guid.IsUnit)
-        {
-            DataFields.InitializeUnitFields();
-        }
-
-        DataFields.SetUInt64Value(EObjectFields.OBJECT_FIELD_GUID, guid);
+        ObjectType |= TypeMask.Object;
+        ScaleX = 1f;
     }
 
     public abstract void Update();

@@ -6,55 +6,56 @@ using CataCraft.Database.Realm.Model;
 using CataCraft.DBC;
 using CataCraft.DBC.Model;
 using CataCraft.Game.Entities.Object;
+using CataCraft.Game.Entities.Object.DataFields;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Networking;
 
-namespace CataCraft.Game.Entities.Player;
+namespace CataCraft.Game.Entities.Unit.Player;
 
-public sealed class Player : Unit.Unit
+public sealed class Player : UnitBase
 {
-    #region DataField accessors
+    #region Update Field Accessors
 
     public byte SkinId
     {
-        get => DataFields.GetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 0);
-        set => DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 0, value);
+        get => GetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 0);
+        set => SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 0, value);
     }
 
     public byte FaceId
     {
-        get => DataFields.GetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 1);
-        set => DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 1, value);
+        get => GetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 1);
+        set => SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 1, value);
     }
 
     public byte HairStyleId
     {
-        get => DataFields.GetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 2);
-        set => DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 2, value);
+        get => GetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 2);
+        set => SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 2, value);
     }
 
     public byte HairColorId
     {
-        get => DataFields.GetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 3);
-        set => DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 3, value);
+        get => GetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 3);
+        set => SetUInt8Value(EPlayerFields.PLAYER_BYTES, 0, 3, value);
     }
 
     public byte FacialHairStyleId
     {
-        get => DataFields.GetUInt8Value(EPlayerFields.PLAYER_BYTES_2, 0, 0);
-        set => DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES_2, 0, 0, value);
+        get => GetUInt8Value(EPlayerFields.PLAYER_BYTES_2, 0, 0);
+        set => SetUInt8Value(EPlayerFields.PLAYER_BYTES_2, 0, 0, value);
     }
 
     public UnitSex PlayerSex
     {
-        get => (UnitSex)DataFields.GetUInt8Value(EPlayerFields.PLAYER_BYTES_3, 0, 0);
-        set => DataFields.SetUInt8Value(EPlayerFields.PLAYER_BYTES_3, 0, 0, (byte)value);
+        get => (UnitSex)GetUInt8Value(EPlayerFields.PLAYER_BYTES_3, 0, 0);
+        set => SetUInt8Value(EPlayerFields.PLAYER_BYTES_3, 0, 0, (byte)value);
     }
 
     public byte MaxLevel
     {
-        get => (byte)DataFields.GetUInt32Value(EPlayerFields.PLAYER_FIELD_MAX_LEVEL, 0);
-        set => DataFields.SetUInt32Value(EPlayerFields.PLAYER_FIELD_MAX_LEVEL, 0, value);
+        get => (byte)GetUInt32Value(EPlayerFields.PLAYER_FIELD_MAX_LEVEL, 0);
+        set => SetUInt32Value(EPlayerFields.PLAYER_FIELD_MAX_LEVEL, 0, value);
     }
 
     #endregion // DataField accessors
@@ -68,8 +69,9 @@ public sealed class Player : Unit.Unit
 
     #endregion
 
-    public Player(WowGuid guid) : base(guid)
+    public Player(WowGuid guid) : base(guid, (int)EPlayerFields.PLAYER_END, ObjectDataFieldConstants.SPlayerVisibilityFlags)
     {
+        ObjectType |= TypeMask.Player | TypeMask.Unk10;
     }
 
     public static bool TryCreatePlayerFromData(Character characterDbData, [NotNullWhen(true)] out Player? player)
@@ -106,7 +108,7 @@ public sealed class Player : Unit.Unit
             HoverHeight = 1f
         };
 
-        player.DataFields.SetInt32Value(EPlayerFields.PLAYER_FIELD_WATCHED_FACTION_INDEX, 0, -1);
+        player.SetInt32Value(EPlayerFields.PLAYER_FIELD_WATCHED_FACTION_INDEX, 0, -1);
         player.MovementStatus.Position = new Vector3(characterDbData.Stats.PositionX, characterDbData.Stats.PositionY, characterDbData.Stats.PositionZ);
         player.MovementStatus.Facing = characterDbData.Stats.Facing;
 
@@ -131,11 +133,9 @@ public sealed class Player : Unit.Unit
 
     public override void Update()
     {
-        base.Update();
     }
 
     public override void Heartbeat()
     {
-        base.Heartbeat();
     }
 }

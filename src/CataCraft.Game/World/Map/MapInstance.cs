@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using CataCraft.Core.Configuration;
 using CataCraft.DBC.Model;
 using CataCraft.Game.Entities.Object;
-using CataCraft.Game.Entities.Player;
+using CataCraft.Game.Entities.Unit.Player;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Protocol.Packets.GamePackets;
 
@@ -161,7 +161,7 @@ public class MapInstance
             foreach (WowObject wowObject in player.VisibleObjects)
             {
                 DataFieldVisibilityFlags visibilityFlags = DataFieldVisibilityFlags.Public;
-                if (wowObject.DataFields.HasPendingUpdates(visibilityFlags))
+                if (wowObject.HasDirtyUpdateFields)
                     updateObject.AddObjectToUpdate(wowObject, visibilityFlags);
             }
 
@@ -184,7 +184,7 @@ public class MapInstance
         // Clear the change mask of all wow objects since they all have been updated now
         foreach (WowObject wowObject in _wowObjects.Values)
         {
-            wowObject.DataFields.ClearChangeMask();
+            wowObject.ClearDirtyUpdateFields();
         }
     }
 }

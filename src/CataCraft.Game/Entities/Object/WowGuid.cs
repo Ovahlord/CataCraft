@@ -6,18 +6,35 @@ using CataCraft.Game.Enums;
 namespace CataCraft.Game.Entities.Object
 {
 
+    public enum TypeId : byte
+    {
+        Object = 0,
+        Item = 1,
+        Container = 2,
+        Unit = 3,
+        Player = 4,
+        GameObject = 5,
+        DynamicObject = 6,
+        Corpse = 7,
+        AreaTrigger = 8,
+        Unk9 = 9,
+        Unk10 = 10
+    }
+
     [Flags]
     public enum TypeMask
     {
-        Object          = 0x0001,
-        Item            = 0x0002,
-        Container       = 0x0006, // ITEM | 0x0004
-        Unit            = 0x0008, // creature
-        Player          = 0x0010,
-        GameObject      = 0x0020,
-        DynamicObject   = 0x0040,
-        Corpse          = 0x0080,
-        AreaTrigger     = 0x0100,
+        Object          = 1 << TypeId.Object,
+        Item            = 1 << TypeId.Item,
+        Container       = 1 << TypeId.Container,
+        Unit            = 1 << TypeId.Unit,
+        Player          = 1 << TypeId.Player,
+        GameObject      = 1 << TypeId.GameObject,
+        DynamicObject   = 1 << TypeId.DynamicObject,
+        Corpse          = 1 << TypeId.Corpse,
+        AreaTrigger     = 1 << TypeId.AreaTrigger,
+        Unk9            = 1 << TypeId.Unk9,
+        Unk10           = 1 << TypeId.Unk10,
         Seer = Player | Unit | DynamicObject
     }
 

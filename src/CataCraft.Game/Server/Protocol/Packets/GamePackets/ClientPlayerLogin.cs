@@ -4,7 +4,7 @@ using System.Buffers;
 using CataCraft.Database.Realm;
 using CataCraft.Database.Realm.Model;
 using CataCraft.Game.Entities.Object;
-using CataCraft.Game.Entities.Player;
+using CataCraft.Game.Entities.Unit.Player;
 using CataCraft.Game.Server.Networking;
 using CataCraft.Game.World.Map;
 using Microsoft.EntityFrameworkCore;

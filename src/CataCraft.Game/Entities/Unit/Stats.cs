@@ -8,7 +8,7 @@ public class Stats
 {
     private readonly Stat[] _stats = new Stat[(int)UnitStats.Max];
 
-    public Stats(Unit owner)
+    public Stats(UnitBase owner)
     {
         for (int i = 0; i < (int)UnitStats.Max; ++i)
         {

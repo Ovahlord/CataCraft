@@ -10,9 +10,9 @@ public class BaseAttackTime
     public uint DefaultBaseAttackTime { get; private set; } = 2000;
 
     // Fields
-    private readonly Unit _owner;
+    private readonly UnitBase _owner;
 
-    public BaseAttackTime(Unit owner)
+    public BaseAttackTime(UnitBase owner)
     {
         _owner = owner;
         this[BaseAttackType.MainHand] = DefaultBaseAttackTime;
@@ -21,7 +21,7 @@ public class BaseAttackTime
 
     public uint this[BaseAttackType index]
     {
-        get => _owner.DataFields.GetUInt32Value(EUnitFields.UNIT_FIELD_BASEATTACKTIME, (int)index);
-        set => _owner.DataFields.SetUInt32Value(EUnitFields.UNIT_FIELD_BASEATTACKTIME, (int)index, value);
+        get => _owner.GetUInt32Value(EUnitFields.UNIT_FIELD_BASEATTACKTIME, (int)index);
+        set => _owner.SetUInt32Value(EUnitFields.UNIT_FIELD_BASEATTACKTIME, (int)index, value);
     }
 }

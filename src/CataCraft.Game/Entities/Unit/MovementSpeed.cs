@@ -19,9 +19,9 @@ public class MovementSpeed
         3.14f // MOVE_PITCH_RATE
     ];
 
-    private readonly Unit _owner;
+    private readonly UnitBase _owner;
 
-    public MovementSpeed(Unit owner) => _owner = owner;
+    public MovementSpeed(UnitBase owner) => _owner = owner;
 
     public float this[MovementType movementType] => s_baseMovementSpeeds[(int)movementType] * _owner.MovementSpeedMultiplier[movementType];
 

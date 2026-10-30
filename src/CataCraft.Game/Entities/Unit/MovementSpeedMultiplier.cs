@@ -19,9 +19,9 @@ public class MovementSpeedMultiplier
         1f,
     ];
 
-    private readonly Unit _owner;
+    private readonly UnitBase _owner;
 
-    public MovementSpeedMultiplier(Unit owner) => _owner = owner;
+    public MovementSpeedMultiplier(UnitBase owner) => _owner = owner;
 
     public float this[MovementType movementType]
     {

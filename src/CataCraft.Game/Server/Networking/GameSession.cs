@@ -9,12 +9,11 @@ using CataCraft.Core.Server.Networking;
 using CataCraft.Core.Server.Protocol.Packets;
 using CataCraft.Database.Login;
 using CataCraft.Database.Login.Model;
-using CataCraft.Game.Entities.Player;
+using CataCraft.Game.Entities.Unit.Player;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Protocol;
 using CataCraft.Game.Server.Protocol.Packets.GamePackets;
 using CataCraft.Game.Server.Protocol.Packets.GamePackets.SubStructures;
-using CataCraft.Game.World.Map;
 using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Game.Server.Networking;
