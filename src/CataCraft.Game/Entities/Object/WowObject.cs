@@ -26,6 +26,12 @@ public abstract class WowObject : MirroredObject
         set => SetFloatValue(EObjectFields.OBJECT_FIELD_SCALE_X, 0, value);
     }
 
+    public int Entry
+    {
+        get => GetInt32Value(EObjectFields.OBJECT_FIELD_ENTRY);
+        set => SetInt32Value(EObjectFields.OBJECT_FIELD_ENTRY, 0, value);
+    }
+
     #endregion // Update Field Accessors
 
     public bool IsNewObject { get; set; }

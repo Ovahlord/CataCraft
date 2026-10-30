@@ -6,7 +6,6 @@ using CataCraft.Database.Realm.Model;
 using CataCraft.DBC;
 using CataCraft.DBC.Model;
 using CataCraft.Game.Entities.Object;
-using CataCraft.Game.Entities.Object.DataFields;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Networking;
 
@@ -69,7 +68,7 @@ public sealed class Player : UnitBase
 
     #endregion
 
-    public Player(WowGuid guid) : base(guid, (int)EPlayerFields.PLAYER_END, ObjectDataFieldConstants.SPlayerVisibilityFlags)
+    public Player(WowGuid guid) : base(guid, (int)EPlayerFields.PLAYER_END, UpdateFieldConstants.SPlayerVisibilityFlags)
     {
         ObjectType |= TypeMask.Player | TypeMask.Unk10;
     }

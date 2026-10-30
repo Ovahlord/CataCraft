@@ -2,9 +2,9 @@
 
 using CataCraft.Game.Enums;
 
-namespace CataCraft.Game.Entities.Object.DataFields;
+namespace CataCraft.Game.Entities.Object;
 
-public static class ObjectDataFieldConstants
+public static class UpdateFieldConstants
 {
     public static readonly DataFieldVisibilityFlags[] SUnitVisibilityFlags =
     [
@@ -156,7 +156,7 @@ public static class ObjectDataFieldConstants
         DataFieldVisibilityFlags.None                                            // UNIT_FIELD_PADDING
     ];
 
-        public static readonly DataFieldVisibilityFlags[] SPlayerVisibilityFlags =
+    public static readonly DataFieldVisibilityFlags[] SPlayerVisibilityFlags =
     [
         DataFieldVisibilityFlags.Public,                                         // OBJECT_FIELD_GUID
         DataFieldVisibilityFlags.Public,                                         // OBJECT_FIELD_GUID+1
