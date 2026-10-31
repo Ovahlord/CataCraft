@@ -16,9 +16,7 @@ namespace CataCraft.Game.Entities.Object
         GameObject = 5,
         DynamicObject = 6,
         Corpse = 7,
-        AreaTrigger = 8,
-        Unk9 = 9,
-        Unk10 = 10
+        AreaTrigger = 8
     }
 
     [Flags]
@@ -33,8 +31,6 @@ namespace CataCraft.Game.Entities.Object
         DynamicObject   = 1 << TypeId.DynamicObject,
         Corpse          = 1 << TypeId.Corpse,
         AreaTrigger     = 1 << TypeId.AreaTrigger,
-        Unk9            = 1 << TypeId.Unk9,
-        Unk10           = 1 << TypeId.Unk10,
         Seer = Player | Unit | DynamicObject
     }
 

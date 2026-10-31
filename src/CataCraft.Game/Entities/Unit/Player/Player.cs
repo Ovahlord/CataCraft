@@ -13,6 +13,12 @@ namespace CataCraft.Game.Entities.Unit.Player;
 
 public sealed class Player : UnitBase
 {
+    // Properties
+    public GameSession? Session { get; set; }
+    public List<WowObject> NewObjects { get; } = [];
+    public List<WowObject> OutOfRangeObjects { get; } = [];
+    public List<WowObject> VisibleObjects { get; } = [];
+
     #region Update Field Accessors
 
     public byte SkinId
@@ -57,20 +63,11 @@ public sealed class Player : UnitBase
         set => SetUInt32Value(EPlayerFields.PLAYER_FIELD_MAX_LEVEL, 0, value);
     }
 
-    #endregion // DataField accessors
-
-    #region Properties
-
-    public GameSession? Session { get; set; }
-    public List<WowObject> NewObjects { get; } = [];
-    public List<WowObject> OutOfRangeObjects { get; } = [];
-    public List<WowObject> VisibleObjects { get; } = [];
-
-    #endregion
+    #endregion // Update Field accessors
 
     public Player(WowGuid guid) : base(guid, (int)EPlayerFields.PLAYER_END, UpdateFieldConstants.SPlayerVisibilityFlags)
     {
-        ObjectType |= TypeMask.Player | TypeMask.Unk10;
+        ObjectType |= TypeMask.Player;
     }
 
     public static bool TryCreatePlayerFromData(Character characterDbData, [NotNullWhen(true)] out Player? player)
