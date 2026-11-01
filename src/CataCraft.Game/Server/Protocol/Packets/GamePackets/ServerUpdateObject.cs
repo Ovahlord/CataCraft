@@ -16,7 +16,7 @@ public ref struct ServerUpdateObject : IServerPacket
     private struct ObjectToUpdate
     {
         public WowObject Object { get; set; }
-        public DataFieldVisibilityFlags VisibilityFlags { get; set; }
+        public UpdateFieldVisibilityFlags VisibilityFlags { get; set; }
     }
 
     private struct ObjectToCreate
@@ -24,7 +24,7 @@ public ref struct ServerUpdateObject : IServerPacket
         public WowObject Object { get; set; }
         public CreateObjectBits CreateObjectBits { get; set; }
         public bool NewSpawn { get; set; }
-        public DataFieldVisibilityFlags VisibilityFlags { get; set; }
+        public UpdateFieldVisibilityFlags VisibilityFlags { get; set; }
     }
 
     public ushort MapRecId { get; set; }
@@ -36,7 +36,7 @@ public ref struct ServerUpdateObject : IServerPacket
     {
     }
 
-    public void AddObjectToUpdate(WowObject obectToUpdate, DataFieldVisibilityFlags visibilityFlags)
+    public void AddObjectToUpdate(WowObject obectToUpdate, UpdateFieldVisibilityFlags visibilityFlags)
     {
         _objectsToUpdate.Add(new ObjectToUpdate()
         {
@@ -45,7 +45,7 @@ public ref struct ServerUpdateObject : IServerPacket
         });
     }
 
-    public void AddObjectToCreate(WowObject objectToCreate, DataFieldVisibilityFlags visibilityFlags, CreateObjectBits createObjectBits)
+    public void AddObjectToCreate(WowObject objectToCreate, UpdateFieldVisibilityFlags visibilityFlags, CreateObjectBits createObjectBits)
     {
         _objectsToCreate.Add(new ObjectToCreate()
         {
@@ -436,7 +436,7 @@ public ref struct ServerUpdateObject : IServerPacket
             writer.WriteUInt32(0); // GameTime::GetGameTimeMS() @todo
     }
 
-    private void WriteUpdateFields(ref ServerPacketWriter writer, WowObject objectToCreate, DataFieldVisibilityFlags visibilityFlags)
+    private void WriteUpdateFields(ref ServerPacketWriter writer, WowObject objectToCreate, UpdateFieldVisibilityFlags visibilityFlags)
     {
         Span<uint> updateBlockBits = stackalloc uint[objectToCreate.UpdateFieldBlockCount];
         Span<byte> updateData = stackalloc byte[objectToCreate.UpdateFieldCount * MirroredObject.UpdateFieldSize];

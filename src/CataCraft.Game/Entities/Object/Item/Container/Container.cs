@@ -6,7 +6,7 @@ namespace CataCraft.Game.Entities.Object.Item.Container;
 
 public sealed class Container : Item
 {
-    public Container(WowGuid guid) : base(guid, (int)EContainerFields.CONTAINER_END, [])
+    public Container(WowGuid guid) : base(guid, (int)EContainerFields.CONTAINER_END, UpdateFieldConstants.SItemVisibilityFlags)
     {
     }
 }

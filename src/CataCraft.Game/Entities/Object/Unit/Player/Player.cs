@@ -1,6 +1,5 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using CataCraft.Database.Realm.Entities;
 using CataCraft.DBC;
@@ -17,6 +16,7 @@ public sealed class Player : Unit
     public List<WowObject> NewObjects { get; } = [];
     public List<WowObject> OutOfRangeObjects { get; } = [];
     public List<WowObject> VisibleObjects { get; } = [];
+    public Inventory Inventory { get; }
 
     #region Update Field Accessors
 
@@ -67,13 +67,11 @@ public sealed class Player : Unit
     public Player(WowGuid guid) : base(guid, (int)EPlayerFields.PLAYER_END, UpdateFieldConstants.SPlayerVisibilityFlags)
     {
         ObjectType |= TypeMask.Player;
+        Inventory = new Inventory(this);
     }
 
     public void InitializeFromData(Character characterDbData)
     {
-        if (characterDbData.Stats == null)
-            throw new NullReferenceException(nameof(characterDbData.Stats));
-
         if (!DBCManager.SChrRacesStore.TryGetValue(characterDbData.RaceId, out ChrRacesEntry? race))
             throw new NullReferenceException($"No record found in ChrRaces.dbc for RaceId {characterDbData.RaceId}");
 
@@ -100,6 +98,16 @@ public sealed class Player : Unit
         MovementStatus.Position = new Vector3(characterDbData.Stats.PositionX, characterDbData.Stats.PositionY, characterDbData.Stats.PositionZ);
         MovementStatus.Facing = characterDbData.Stats.Facing;
 
+        foreach (CharacterInventory inventoryItem in characterDbData.Inventory)
+        {
+            Item.Item item = EntityFactory.CreateItem(inventoryItem.Item.Id);
+            item.Owner = Guid;
+            item.Entry = inventoryItem.Item.ItemId;
+
+            Inventory.EquipItem(item, (InventorySlot)inventoryItem.InventorySlot);
+            NewObjects.Add(item);
+        }
+
         // The player can always see himself
         NewObjects.Add(this);
 
@@ -116,44 +124,6 @@ public sealed class Player : Unit
         }
 
         Powers.Initialize();
-    }
-
-    public static bool TryCreatePlayerFromData(Character characterDbData, [NotNullWhen(true)] out Player? player)
-    {
-        if (characterDbData.Stats == null)
-        {
-            player = null;
-            return false;
-        }
-
-        if (!DBCManager.SChrRacesStore.TryGetValue(characterDbData.RaceId, out ChrRacesEntry? race))
-        {
-            player = null;
-            return false;
-        }
-
-        player = new(new WowGuid(WowGuidType.Player, (uint)characterDbData.Id))
-        {
-            Sex = (UnitSex)characterDbData.SexId, PlayerSex = (UnitSex)characterDbData.SexId, FaceId = characterDbData.FaceId,
-            SkinId = characterDbData.SkinId,
-            HairStyleId = characterDbData.HairStyleId,
-            HairColorId = characterDbData.HairColorId,
-            FacialHairStyleId = characterDbData.FacialHairStyleId,
-            Level = characterDbData.Stats.ExperienceLevel,
-            MaxLevel = 85,
-            Race = (ChrRace)characterDbData.RaceId,
-            Class = (ChrClass)characterDbData.ClassId,
-            Flags = UnitFlags.PlayerControlled,
-            Flags2 = UnitFlags2.RegeneratePower,
-            MaxHealth = 100,
-            Health = 100,
-            BoundingRadius = 1f,
-            CombatReach = 1f,
-            HoverHeight = 1f
-        };
-
-
-        return true;
     }
 
     public override void Update()

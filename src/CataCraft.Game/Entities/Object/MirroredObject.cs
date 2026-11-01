@@ -17,9 +17,9 @@ public abstract class MirroredObject
 
     private readonly byte[] _objectData;
     private readonly BitArray _dirtyMask;
-    private readonly DataFieldVisibilityFlags[] _visibilityFlags;
+    private readonly UpdateFieldVisibilityFlags[] _visibilityFlags;
 
-    public MirroredObject(int updateFieldCount, DataFieldVisibilityFlags[] visibilityFlags)
+    public MirroredObject(int updateFieldCount, UpdateFieldVisibilityFlags[] visibilityFlags)
     {
         _objectData = new byte[updateFieldCount * UpdateFieldSize];
         _dirtyMask = new BitArray(updateFieldCount);
@@ -27,7 +27,7 @@ public abstract class MirroredObject
     }
 
     public bool IsUpdateFieldDirty(int index) => _dirtyMask[index];
-    public bool IsUpdateFieldVisible(int index, DataFieldVisibilityFlags visibilityFlags) => (int)(_visibilityFlags[index] & visibilityFlags) != 0;
+    public bool IsUpdateFieldVisible(int index, UpdateFieldVisibilityFlags visibilityFlags) => (int)(_visibilityFlags[index] & visibilityFlags) != 0;
     public void ClearDirtyUpdateFields() => _dirtyMask.SetAll(false);
     public ReadOnlySpan<byte> UpdateFieldData(int index) => _objectData.AsSpan(index * UpdateFieldSize, UpdateFieldSize);
 
@@ -191,27 +191,27 @@ public abstract class MirroredObject
     public void SetInt64Value(ECorpseFields dataField, long value) => SetInt64Value((int)dataField, value);
     public void SetInt64Value(EDynamicObjectFields dataField, long value) => SetInt64Value((int)dataField, value);
 
-    private void SetUInt64Value(int dataField, ulong value)
+    private void SetUInt64Value(int dataField, int arrayIndex, ulong value)
     {
-        Span<byte> field = _objectData.AsSpan(dataField * UpdateFieldSize, UpdateFieldSize * 2);
+        Span<byte> field = _objectData.AsSpan(dataField * UpdateFieldSize + arrayIndex * UpdateFieldSize * 2, UpdateFieldSize * 2);
         ulong oldValue = BinaryPrimitives.ReadUInt64LittleEndian(field);
         if (oldValue == value)
             return;
 
         BinaryPrimitives.WriteUInt64LittleEndian(field, value);
-        _dirtyMask.Set(dataField, true);
-        _dirtyMask.Set(dataField + 1, true);
+        _dirtyMask.Set(dataField + arrayIndex * 2, true);
+        _dirtyMask.Set(dataField + arrayIndex * 2 + 1, true);
     }
 
-    public void SetUInt64Value(EObjectFields dataField, ulong value) => SetUInt64Value((int)dataField, value);
-    public void SetUInt64Value(EUnitFields dataField, ulong value) => SetUInt64Value((int)dataField, value);
-    public void SetUInt64Value(EPlayerFields dataField, ulong value) => SetUInt64Value((int)dataField, value);
-    public void SetUInt64Value(EItemFields dataField, ulong value) => SetUInt64Value((int)dataField, value);
-    public void SetUInt64Value(EGameObjectFields dataField, ulong value) => SetUInt64Value((int)dataField, value);
-    public void SetUInt64Value(EAreaTriggerFields dataField, ulong value) => SetUInt64Value((int)dataField, value);
-    public void SetUInt64Value(EContainerFields dataField, ulong value) => SetUInt64Value((int)dataField, value);
-    public void SetUInt64Value(ECorpseFields dataField, ulong value) => SetUInt64Value((int)dataField, value);
-    public void SetUInt64Value(EDynamicObjectFields dataField, ulong value) => SetUInt64Value((int)dataField, value);
+    public void SetUInt64Value(EObjectFields dataField, int arrayIndex, ulong value) => SetUInt64Value((int)dataField, arrayIndex, value);
+    public void SetUInt64Value(EUnitFields dataField, int arrayIndex,ulong value) => SetUInt64Value((int)dataField, arrayIndex, value);
+    public void SetUInt64Value(EPlayerFields dataField, int arrayIndex,ulong value) => SetUInt64Value((int)dataField, arrayIndex, value);
+    public void SetUInt64Value(EItemFields dataField, int arrayIndex,ulong value) => SetUInt64Value((int)dataField, arrayIndex, value);
+    public void SetUInt64Value(EGameObjectFields dataField, int arrayIndex,ulong value) => SetUInt64Value((int)dataField, arrayIndex, value);
+    public void SetUInt64Value(EAreaTriggerFields dataField, int arrayIndex,ulong value) => SetUInt64Value((int)dataField, arrayIndex, value);
+    public void SetUInt64Value(EContainerFields dataField, int arrayIndex,ulong value) => SetUInt64Value((int)dataField, arrayIndex, value);
+    public void SetUInt64Value(ECorpseFields dataField, int arrayIndex,ulong value) => SetUInt64Value((int)dataField, arrayIndex, value);
+    public void SetUInt64Value(EDynamicObjectFields dataField, int arrayIndex,ulong value) => SetUInt64Value((int)dataField, arrayIndex, value);
 
     private void SetInt32Value(int dataField, int arrayIndex, int value)
     {

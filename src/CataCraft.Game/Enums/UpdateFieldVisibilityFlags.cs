@@ -3,7 +3,7 @@
 namespace CataCraft.Game.Enums;
 
 [Flags]
-public enum DataFieldVisibilityFlags
+public enum UpdateFieldVisibilityFlags
 {
     None        = 0x000,
     Public      = 0x001,

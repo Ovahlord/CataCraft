@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using CataCraft.Core.Configuration;
 using CataCraft.DBC.Model;
 using CataCraft.Game.Entities.Object;
+using CataCraft.Game.Entities.Object.Item;
 using CataCraft.Game.Entities.Object.Unit.Player;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Protocol.Packets.GamePackets;
@@ -149,28 +150,37 @@ public class MapInstance
             // Building create object packet segments for everything that just became visible
             foreach (WowObject wowObject in player.NewObjects)
             {
-                DataFieldVisibilityFlags visibilityFlags = DataFieldVisibilityFlags.Public;
+                UpdateFieldVisibilityFlags visibilityFlags = UpdateFieldVisibilityFlags.Public;
                 CreateObjectBits createObjectBits = new();
 
                 // Player is being created for the first time
                 if (wowObject == player)
                 {
-                    visibilityFlags |= DataFieldVisibilityFlags.Private | DataFieldVisibilityFlags.UnitAll | DataFieldVisibilityFlags.Dynamic;
+                    visibilityFlags |= UpdateFieldVisibilityFlags.Private | UpdateFieldVisibilityFlags.UnitAll | UpdateFieldVisibilityFlags.Dynamic;
                     createObjectBits.ThisIsYou = true;
                 }
+
+                if (wowObject is Item)
+                    visibilityFlags |= UpdateFieldVisibilityFlags.ItemOwner;
 
                 if (wowObject.Guid.IsPlayer || wowObject.Guid.IsUnit || wowObject.Guid.IsPet)
                     createObjectBits.MovementUpdate = true;
 
-                updateObject.AddObjectToCreate(player, visibilityFlags, createObjectBits);
+                updateObject.AddObjectToCreate(wowObject, visibilityFlags, createObjectBits);
             }
 
             // Building value update object packet segments for everything that has its data changed
             foreach (WowObject wowObject in player.VisibleObjects)
             {
-                DataFieldVisibilityFlags visibilityFlags = DataFieldVisibilityFlags.Public;
+                UpdateFieldVisibilityFlags visibilityFlags = UpdateFieldVisibilityFlags.Public;
+
                 if (wowObject.HasDirtyUpdateFields)
+                {
+                    if (wowObject is Item)
+                        visibilityFlags |= UpdateFieldVisibilityFlags.ItemOwner;
+
                     updateObject.AddObjectToUpdate(wowObject, visibilityFlags);
+                }
             }
 
             // Building out of range update object packet segments for everything that has moved out of visibility range

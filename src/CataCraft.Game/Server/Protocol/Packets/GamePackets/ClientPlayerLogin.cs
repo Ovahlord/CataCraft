@@ -53,18 +53,18 @@ public ref struct ClientPlayerLogin
         Character? characterDbData = await realmDb.Characters
             .Include(c => c.Stats)
             .Include(c => c.CharacterData)
+            .Include(c => c.Inventory).ThenInclude(i => i.Item)
             .Where(c => c.Id == playerGuid.Counter
                         && c.RealmId == session.Realm.RealmId
                         && c.GameAccountId == session.GameAccountId)
             .AsNoTracking()
             .FirstOrDefaultAsync();
 
-        if (characterDbData == null || characterDbData.Stats == null)
+        if (characterDbData == null)
         {
             session.Close();
             return;
         }
-
 
         MapInstance? instance = await session.Realm.World.GetInstanceForMapIdAsync(characterDbData.Stats.MapId);
         if (instance == null)

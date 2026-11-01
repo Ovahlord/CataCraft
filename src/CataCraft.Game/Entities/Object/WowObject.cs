@@ -14,13 +14,13 @@ public abstract class WowObject : MirroredObject
     public WowGuid Guid
     {
         get => GetUInt64Value(EObjectFields.OBJECT_FIELD_GUID);
-        private init => SetUInt64Value(EObjectFields.OBJECT_FIELD_GUID, value);
+        private init => SetUInt64Value(EObjectFields.OBJECT_FIELD_GUID, 0, value);
     }
 
     public WowGuid GuidData
     {
         get => GetUInt64Value(EObjectFields.OBJECT_FIELD_DATA);
-        set=> SetUInt64Value(EObjectFields.OBJECT_FIELD_DATA, value);
+        set=> SetUInt64Value(EObjectFields.OBJECT_FIELD_DATA, 0, value);
     }
 
     public TypeMask ObjectType
@@ -49,7 +49,7 @@ public abstract class WowObject : MirroredObject
 
     #endregion // Update Field Accessors
 
-    protected WowObject(WowGuid guid, int updateFieldCount, DataFieldVisibilityFlags[] updateFieldVisibilityFlags) : base(updateFieldCount, updateFieldVisibilityFlags)
+    protected WowObject(WowGuid guid, int updateFieldCount, UpdateFieldVisibilityFlags[] updateFieldVisibilityFlags) : base(updateFieldCount, updateFieldVisibilityFlags)
     {
         Guid = guid;
         IsNewObject = true;

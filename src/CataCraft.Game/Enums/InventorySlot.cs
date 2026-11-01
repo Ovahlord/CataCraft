@@ -28,7 +28,7 @@ public enum InventorySlot
     BagEnd = 23,
 
     ItemStart = 23,
-    ItemEnd = 39,
+    ItemsEnd = 39,
 
     BankItemStart = 39,
     BankItemEnd = 67,

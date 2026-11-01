@@ -144,7 +144,7 @@ public class Unit : WowObject, ITransportInfo
         MovementStatus = new MovementStatus();
     }
 
-    public Unit(WowGuid guid, int updatedFieldsCount, DataFieldVisibilityFlags[] visibilityFlagsA) : base(guid, updatedFieldsCount, visibilityFlagsA)
+    public Unit(WowGuid guid, int updatedFieldsCount, UpdateFieldVisibilityFlags[] visibilityFlagsA) : base(guid, updatedFieldsCount, visibilityFlagsA)
     {
         ObjectType |= TypeMask.Unit;
 
