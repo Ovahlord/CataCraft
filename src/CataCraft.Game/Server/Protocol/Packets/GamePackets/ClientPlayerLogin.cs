@@ -2,9 +2,10 @@
 
 using System.Buffers;
 using CataCraft.Database.Realm;
-using CataCraft.Database.Realm.Model;
+using CataCraft.Database.Realm.Entities;
+using CataCraft.Game.Entities;
 using CataCraft.Game.Entities.Object;
-using CataCraft.Game.Entities.Unit.Player;
+using CataCraft.Game.Entities.Object.Unit.Player;
 using CataCraft.Game.Server.Networking;
 using CataCraft.Game.World.Map;
 using Microsoft.EntityFrameworkCore;
@@ -75,13 +76,8 @@ public ref struct ClientPlayerLogin
         // Attempt to pick up the already existing player toon in case of a disconnect
         if (!instance.TryGetPlayer(playerGuid, out Player? player))
         {
-            // No player found - try to create a new entity
-            if (!Player.TryCreatePlayerFromData(characterDbData, out player))
-            {
-                session.Close();
-                return;
-            }
-
+            player = EntityFactory.CreatePlayer((int)playerGuid.Counter);
+            player.InitializeFromData(characterDbData);
             Console.WriteLine("Created new player object for login");
         }
         else

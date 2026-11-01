@@ -4,6 +4,7 @@ using CataCraft.Core.Configuration;
 using CataCraft.Core.Cryptography;
 using CataCraft.Database;
 using CataCraft.DBC;
+using CataCraft.Game.Entities;
 using CataCraft.Game.Realm;
 using CataCraft.Game.Server.Networking;
 
@@ -39,6 +40,9 @@ public static class Program
 
             await DatabaseManager.ImportGameData();
         }
+
+        // Initalize the game entity Id counters
+        await EntityFactory.InitializeEntityIdsAsync();
 
         // Load realms
         await RealmManager.LoadRealmsAsync();

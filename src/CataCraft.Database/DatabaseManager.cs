@@ -2,7 +2,7 @@
 
 using CataCraft.Database.Game;
 using CataCraft.Database.Login;
-using CataCraft.Database.Login.Model;
+using CataCraft.Database.Login.Entities;
 using CataCraft.Database.Realm;
 using Microsoft.EntityFrameworkCore;
 
@@ -69,7 +69,7 @@ public static class DatabaseManager
         try
         {
             await using RealmDbContext realmDb = new();
-            Realm.Model.Realm realm = new() { RealmName = "CataCraft", };
+            Realm.Entities.Realm realm = new() { RealmName = "CataCraft", };
 
             realmDb.Realms.Add(realm);
             await realmDb.SaveChangesAsync();

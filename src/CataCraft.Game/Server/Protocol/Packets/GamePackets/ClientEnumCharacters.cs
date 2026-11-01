@@ -2,7 +2,9 @@
 
 using System.Buffers;
 using CataCraft.Database.Realm;
-using CataCraft.Database.Realm.Model;
+using CataCraft.Database.Realm.Entities;
+using CataCraft.DBC;
+using CataCraft.DBC.Model;
 using CataCraft.Game.Entities.Object;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Networking;
@@ -24,6 +26,7 @@ public ref struct ClientEnumCharacters
         GameSession gameSession = session;
         List<Character> realmCharacters = await realmDb.Characters
             .Include(rc => rc.Stats)
+            .Include(rc => rc.Inventory).ThenInclude(i => i.Item)
             .Where(rc => rc.RealmId == gameSession.Realm.RealmId && rc.GameAccountId == gameSession.GameAccountId)
             .OrderBy(rc => rc.ListPositionIndex)
             .AsNoTracking()
@@ -31,16 +34,12 @@ public ref struct ClientEnumCharacters
 
         ServerEnumCharactersResult enumCharactersResult = new()
         {
-            Success = true,
+            Success = true
         };
 
         foreach (Character character in realmCharacters)
         {
-            CharacterStats? stats = character.Stats;
-            if (stats == null)
-                continue;
-
-            enumCharactersResult.Characters.Add(new CharacterListEntry()
+            CharacterListEntry listEntry = new()
             {
                 Guid = new WowGuid(WowGuidType.Player, (uint)character.Id),
                 Name = character.Name,
@@ -52,15 +51,32 @@ public ref struct ClientEnumCharacters
                 SexID = character.SexId,
                 SkinID = character.SkinId,
                 FacialHair = character.FacialHairStyleId,
-                ExperienceLevel = stats.ExperienceLevel,
-                Flags = (CharacterFlags)(stats.CharacterFlags),
-                Flags2 = (CharacterFlags2)(stats.CharacterFlags2),
+                ExperienceLevel = character.Stats.ExperienceLevel,
+                Flags = (CharacterFlags)(character.Stats.CharacterFlags),
+                Flags2 = (CharacterFlags2)(character.Stats.CharacterFlags2),
                 ListPosition = character.ListPositionIndex,
-                ZoneID = stats.AreaId,
-                MapID = stats.MapId,
-                PreloadPos = [stats.PositionX, stats.PositionY, stats.PositionZ],
-                FirstLogin = stats.FirstLogin
-            });
+                ZoneID = character.Stats.AreaId,
+                MapID = character.Stats.MapId,
+                PreloadPos = [character.Stats.PositionX, character.Stats.PositionY, character.Stats.PositionZ],
+                FirstLogin = character.Stats.FirstLogin
+            };
+
+            foreach (CharacterInventory inventory in character.Inventory.Where(i => i.InventorySlot < (int)InventorySlot.BagEnd))
+            {
+                if (DBCManager.SItemStore.TryGetValue(inventory.Item.ItemId, out ItemEntry? item))
+                {
+                    CharacterListItem listItem = new()
+                    {
+                        InvType = (byte)item.InventoryType,
+                        DisplayID = (uint)inventory.Item.ItemDisplayId
+                    };
+
+                    listEntry.InventoryItems[inventory.InventorySlot] = listItem;
+                }
+
+            }
+
+            enumCharactersResult.Characters.Add(listEntry);
         }
 
         session.EnqueuePacket(ref enumCharactersResult);

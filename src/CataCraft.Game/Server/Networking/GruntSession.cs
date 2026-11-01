@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using CataCraft.Core.Cryptography;
 using CataCraft.Core.Server.Networking;
 using CataCraft.Database.Login;
-using CataCraft.Database.Login.Model;
+using CataCraft.Database.Login.Entities;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Protocol;
 using Microsoft.EntityFrameworkCore;

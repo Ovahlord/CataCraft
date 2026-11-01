@@ -12,9 +12,9 @@ public static class RealmManager
     public static async Task LoadRealmsAsync()
     {
         await using RealmDbContext realmDb = new();
-        List<Database.Realm.Model.Realm> realmDbEntries = realmDb.Realms.ToList();
+        List<Database.Realm.Entities.Realm> realmDbEntries = realmDb.Realms.ToList();
 
-        foreach (Database.Realm.Model.Realm realmDbEntry in realmDbEntries)
+        foreach (Database.Realm.Entities.Realm realmDbEntry in realmDbEntries)
         {
             Realm realm = new(realmDbEntry);
             Realms.Add(realmDbEntry.Id, realm);

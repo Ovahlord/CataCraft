@@ -1,7 +1,7 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
 using CataCraft.Core.Server.Protocol.Packets;
-using CataCraft.Database.Realm.Model;
+using CataCraft.Database.Realm.Entities;
 using CataCraft.Game.Enums;
 
 namespace CataCraft.Game.Server.Protocol.Packets.GamePackets;

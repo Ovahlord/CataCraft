@@ -2,7 +2,7 @@
 
 using CataCraft.Core;
 using CataCraft.Core.Configuration;
-using CataCraft.Database.Login.Model;
+using CataCraft.Database.Login.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Database.Login;

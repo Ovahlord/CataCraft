@@ -106,6 +106,8 @@ public static class WDBCReader
                     dataArray.SetValue(arrayFieldValue, x);
                 }
 
+                field.SetValue(record, dataArray);
+
                 continue;
             }
 

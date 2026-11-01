@@ -29,5 +29,5 @@ public sealed class CharacterListEntry
     public byte SkinID { get; set; }
     public bool FirstLogin { get; set; }
     public string Name { get; set; } = string.Empty;
-    public CharacterListItem?[] InventoryItems { get; set; } = new CharacterListItem[23];
+    public CharacterListItem?[] InventoryItems { get; set; } = new CharacterListItem?[23];
 }

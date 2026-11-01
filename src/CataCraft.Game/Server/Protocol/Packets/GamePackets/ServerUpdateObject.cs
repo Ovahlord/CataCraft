@@ -2,7 +2,7 @@
 
 using CataCraft.Core.Server.Protocol.Packets;
 using CataCraft.Game.Entities.Object;
-using CataCraft.Game.Entities.Unit;
+using CataCraft.Game.Entities.Object.Unit;
 using CataCraft.Game.Enums;
 
 namespace CataCraft.Game.Server.Protocol.Packets.GamePackets;
@@ -120,7 +120,7 @@ public ref struct ServerUpdateObject : IServerPacket
 
         if (createObjectBits.MovementUpdate)
         {
-            if (wowObject is not UnitBase unit)
+            if (wowObject is not Unit unit)
                 throw new Exception($"CreateObjectBits.MovementUpdate can only be used for Units but has been used incorrectly for WowObject (GUID: {wowObject.Guid})");
 
             writer.WriteBit(unit.MovementStatus.MovementFlags0 == MovementFlags0.None);
@@ -176,28 +176,28 @@ public ref struct ServerUpdateObject : IServerPacket
 
         if (createObjectBits.MovementTransport)
         {
-            if (wowObject is not WorldObject worldObject)
-                throw new Exception($"CreateObjectBits.MovementUpdate can only be used for WorldObjects but has been used incorrectly for WowObject (GUID: {wowObject.Guid})");
+            if (wowObject is not ITransportInfo transportInfo)
+                throw new Exception($"CreateObjectBits.MovementUpdate can only be used for Objects but has been used incorrectly for WowObject (GUID: {wowObject.Guid})");
 
-            if (worldObject.MovementStatus.Transport == null)
-                throw new NullReferenceException($"WorldObject (GUID: {worldObject.Guid})" +
+            if (transportInfo.Transport == null)
+                throw new NullReferenceException($"WorldObject (GUID: {wowObject.Guid})" +
                                                  $" was flagged for sending transport data in SMSG_UPDATE_OBJECT but it had no transport reference!");
 
-            writer.WriteBit(worldObject.MovementStatus.Transport.Guid[5]);
-            writer.WriteBit(worldObject.MovementStatus.Transport.VehicleRecID.HasValue);
-            writer.WriteBit(worldObject.MovementStatus.Transport.Guid[0]);
-            writer.WriteBit(worldObject.MovementStatus.Transport.Guid[3]);
-            writer.WriteBit(worldObject.MovementStatus.Transport.Guid[6]);
-            writer.WriteBit(worldObject.MovementStatus.Transport.Guid[1]);
-            writer.WriteBit(worldObject.MovementStatus.Transport.Guid[4]);
-            writer.WriteBit(worldObject.MovementStatus.Transport.Guid[2]);
-            writer.WriteBit(worldObject.MovementStatus.Transport.PrevMoveTime.HasValue);
-            writer.WriteBit(worldObject.MovementStatus.Transport.Guid[7]);
+            writer.WriteBit(transportInfo.Transport.Guid[5]);
+            writer.WriteBit(transportInfo.Transport.VehicleRecID.HasValue);
+            writer.WriteBit(transportInfo.Transport.Guid[0]);
+            writer.WriteBit(transportInfo.Transport.Guid[3]);
+            writer.WriteBit(transportInfo.Transport.Guid[6]);
+            writer.WriteBit(transportInfo.Transport.Guid[1]);
+            writer.WriteBit(transportInfo.Transport.Guid[4]);
+            writer.WriteBit(transportInfo.Transport.Guid[2]);
+            writer.WriteBit(transportInfo.Transport.PrevMoveTime.HasValue);
+            writer.WriteBit(transportInfo.Transport.Guid[7]);
         }
 
         if (createObjectBits.CombatVictim)
         {
-            if (wowObject is not UnitBase unit)
+            if (wowObject is not Unit unit)
                 writer.WriteUInt8(0);
             else
             {
@@ -230,7 +230,7 @@ public ref struct ServerUpdateObject : IServerPacket
 
         if (createObjectBits.MovementUpdate)
         {
-            if (wowObject is not UnitBase unit)
+            if (wowObject is not Unit unit)
                 throw new Exception($"CreateObjectBits.MovementUpdate can only be used for Units but has been used incorrectly for WowObject (GUID: {wowObject.Guid})");
 
             writer.WriteByteSeq(unit.Guid[4]);
@@ -323,7 +323,7 @@ public ref struct ServerUpdateObject : IServerPacket
 
         if (createObjectBits.Vehicle)
         {
-            if (wowObject is not UnitBase unit)
+            if (wowObject is not Unit unit)
                 throw new Exception($"CreateObjectBits.Vehicle can only be used for Units but has been used incorrectly for WowObject (GUID: {wowObject.Guid})");
 
             if (unit.MovementStatus.Transport != null)
@@ -336,34 +336,34 @@ public ref struct ServerUpdateObject : IServerPacket
 
         if (createObjectBits.MovementTransport)
         {
-            if (wowObject is not WorldObject worldObject)
+            if (wowObject is not ITransportInfo transportInfo)
                 throw new Exception($"CreateObjectBits.MovementUpdate can only be used for WorldObjects but has been used incorrectly for WowObject (GUID: {wowObject.Guid})");
 
-            if (worldObject.MovementStatus.Transport == null)
-                throw new NullReferenceException($"WorldObject (GUID: {worldObject.Guid})" +
+            if (transportInfo.Transport == null)
+                throw new NullReferenceException($"WorldObject (GUID: {wowObject.Guid})" +
                                                  $" was flagged for sending transport data in SMSG_UPDATE_OBJECT but it had no transport reference!");
 
-            writer.WriteByteSeq(worldObject.MovementStatus.Transport.Guid[0]);
-            writer.WriteByteSeq(worldObject.MovementStatus.Transport.Guid[5]);
+            writer.WriteByteSeq(transportInfo.Transport.Guid[0]);
+            writer.WriteByteSeq(transportInfo.Transport.Guid[5]);
 
-            if (worldObject.MovementStatus.Transport.VehicleRecID.HasValue)
-                writer.WriteInt32(worldObject.MovementStatus.Transport.VehicleRecID.Value);
+            if (transportInfo.Transport.VehicleRecID.HasValue)
+                writer.WriteInt32(transportInfo.Transport.VehicleRecID.Value);
 
-            writer.WriteByteSeq(worldObject.MovementStatus.Transport.Guid[3]);
-            writer.WriteFloat(worldObject.MovementStatus.Transport.Position.X);
-            writer.WriteByteSeq(worldObject.MovementStatus.Transport.Guid[4]);
-            writer.WriteByteSeq(worldObject.MovementStatus.Transport.Guid[6]);
-            writer.WriteByteSeq(worldObject.MovementStatus.Transport.Guid[1]);
-            writer.WriteUInt32(worldObject.MovementStatus.Transport.MoveTime);
-            writer.WriteFloat(worldObject.MovementStatus.Transport.Position.Y);
-            writer.WriteByteSeq(worldObject.MovementStatus.Transport.Guid[2]);
-            writer.WriteByteSeq(worldObject.MovementStatus.Transport.Guid[7]);
-            writer.WriteFloat(worldObject.MovementStatus.Transport.Position.Z);
-            writer.WriteUInt8(worldObject.MovementStatus.Transport.VehicleSeatIndex);
-            writer.WriteFloat(worldObject.MovementStatus.Transport.Facing);
+            writer.WriteByteSeq(transportInfo.Transport.Guid[3]);
+            writer.WriteFloat(transportInfo.Transport.Position.X);
+            writer.WriteByteSeq(transportInfo.Transport.Guid[4]);
+            writer.WriteByteSeq(transportInfo.Transport.Guid[6]);
+            writer.WriteByteSeq(transportInfo.Transport.Guid[1]);
+            writer.WriteUInt32(transportInfo.Transport.MoveTime);
+            writer.WriteFloat(transportInfo.Transport.Position.Y);
+            writer.WriteByteSeq(transportInfo.Transport.Guid[2]);
+            writer.WriteByteSeq(transportInfo.Transport.Guid[7]);
+            writer.WriteFloat(transportInfo.Transport.Position.Z);
+            writer.WriteUInt8(transportInfo.Transport.VehicleSeatIndex);
+            writer.WriteFloat(transportInfo.Transport.Facing);
 
-            if (worldObject.MovementStatus.Transport.PrevMoveTime.HasValue)
-                writer.WriteUInt32(worldObject.MovementStatus.Transport.PrevMoveTime.Value);
+            if (transportInfo.Transport.PrevMoveTime.HasValue)
+                writer.WriteUInt32(transportInfo.Transport.PrevMoveTime.Value);
         }
 
         if (createObjectBits.Rotation)

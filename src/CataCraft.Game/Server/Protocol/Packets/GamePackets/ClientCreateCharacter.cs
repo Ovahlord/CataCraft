@@ -2,8 +2,9 @@
 
 using System.Buffers;
 using CataCraft.Database.Realm;
-using CataCraft.Database.Realm.Model;
+using CataCraft.Database.Realm.Entities;
 using CataCraft.DBC;
+using CataCraft.DBC.Model;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Networking;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,7 @@ public struct ClientCreateCharacter
     private const int MaxCharactersPerRealm   = 10;
     private const int MaxCharactersPerAccount = 50;
 
-    private struct CharacterCreationPositionData
+    private class CharacterCreationPositionData
     {
         public CharacterCreationPositionData(int mapId, float positionX, float positionY, float positionZ, float facing)
         {
@@ -81,6 +82,7 @@ public struct ClientCreateCharacter
     {
         ClientCreateCharacter createCharacter = new(payload);
 
+        // Check for a valid race and class selection
         if (!DBCManager.SChrRacesStore.ContainsKey(createCharacter.RaceID) ||
             !DBCManager.SChrClassesStore.ContainsKey(createCharacter.ClassID))
         {
@@ -88,7 +90,8 @@ public struct ClientCreateCharacter
             return;
         }
 
-        CharacterCreationPositionData positionData;
+        // Determine the starting location
+        CharacterCreationPositionData? positionData;
         if ((ChrClass)createCharacter.ClassID == ChrClass.DeathKnight)
             positionData = s_deathKnightCreationPositionData;
         else if (!s_creationPositionData.TryGetValue((ChrRace)createCharacter.RaceID, out positionData))
@@ -102,12 +105,14 @@ public struct ClientCreateCharacter
             .Where(rc => rc.RealmId == session.Realm.RealmId && rc.GameAccountId == session.GameAccountId)
             .ToListAsync();
 
+        // Disable character creation in locked realms for accounts who don't have an account yet
         if (realmCharacters.Count == 0 && session.Realm.LockedForNewPlayers)
         {
             SendCharCreateResponse(ResponseCodes.CharCreateOnlyExisting, session);
             return;
         }
 
+        // Enforce the character limit
         if (realmCharacters.Count >= MaxCharactersPerRealm)
         {
             SendCharCreateResponse(ResponseCodes.CharCreateServerLimit, session);
@@ -123,6 +128,7 @@ public struct ClientCreateCharacter
             return;
         }
 
+        // Calculate the list position
         byte listPosition = 1;
         if (realmCharacters.Count > 0)
         {
@@ -130,6 +136,7 @@ public struct ClientCreateCharacter
             listPosition += 1;
         }
 
+        // Prepare the database entries
         CharacterStats characterStats = new()
         {
             MapId = positionData.MapId,
@@ -155,6 +162,15 @@ public struct ClientCreateCharacter
             Stats = characterStats,
         };
 
+        // Create the starting outfit
+        CharStartOutfitEntry? startOutfitEntry = DBCManager.SCharStartOutfitStore.Values
+            .FirstOrDefault(o => o.ClassID == createCharacter.ClassID &&
+                                 o.RaceID == createCharacter.RaceID &&
+                                 o.SexID == createCharacter.SexID);
+
+        if (startOutfitEntry != null)
+            CreateStartingInventory(character, startOutfitEntry);
+
         realmDb.Characters.Add(character);
 
         try
@@ -175,5 +191,116 @@ public struct ClientCreateCharacter
     {
         ServerCreateChar createChar = new(response);
         session.EnqueuePacket(ref createChar);
+    }
+
+    private static void CreateStartingInventory(Character characterDbEntry, CharStartOutfitEntry startOutfitEntry)
+    {
+        int currentBackpackSlot = (int)InventorySlot.ItemStart;
+        int currentRingSlot = (int)InventorySlot.Finger1;
+        int currentBagSlot = (int)InventorySlot.BagStart;
+        int currentWeaponSlot = (int)InventorySlot.Mainhand;
+        int currentTrinketSlot = (int)InventorySlot.Trinket1;
+
+        for (int i = 0; i < startOutfitEntry.ItemID.Length; ++i)
+        {
+            if (startOutfitEntry.ItemID[i] <= 0 || !DBCManager.SItemStore.TryGetValue(startOutfitEntry.ItemID[i], out ItemEntry? itemEntry))
+                continue;
+
+            int itemSlot = -1;
+
+            switch ((InventoryType)itemEntry.InventoryType)
+            {
+                case InventoryType.NonEquip:
+                    itemSlot = currentBackpackSlot++;
+                    break;
+                case InventoryType.Chest:
+                case InventoryType.Robe:
+                    itemSlot = (int)InventorySlot.Chest;
+                    break;
+                case InventoryType.Body:
+                    itemSlot = (int)InventorySlot.Body;
+                    break;
+                case InventoryType.Feet:
+                    itemSlot = (int)InventorySlot.Feet;
+                    break;
+                case InventoryType.Legs:
+                    itemSlot = (int)InventorySlot.Legs;
+                    break;
+                case InventoryType.Hands:
+                    itemSlot = (int)InventorySlot.Hands;
+                    break;
+                case InventoryType.Shoulders:
+                    itemSlot = (int)InventorySlot.Shoulders;
+                    break;
+                case InventoryType.Bag:
+                    itemSlot = currentBagSlot++;
+                    break;
+                case InventoryType.Wrists:
+                    itemSlot = (int)InventorySlot.Wrists;
+                    break;
+                case InventoryType.Head:
+                    itemSlot = (int)InventorySlot.Head;
+                    break;
+                case InventoryType.Waist:
+                    itemSlot = (int)InventorySlot.Waist;
+                    break;
+                case InventoryType.Neck:
+                    itemSlot = (int)InventorySlot.Neck;
+                    break;
+                case InventoryType.Cloak:
+                    itemSlot = (int)InventorySlot.Back;
+                    break;
+                case InventoryType.Weapon:
+                    itemSlot = currentWeaponSlot++;
+                    break;
+                case InventoryType.Trinket:
+                    itemSlot = currentTrinketSlot++;
+                    break;
+                case InventoryType.Tabard:
+                    itemSlot = (int)InventorySlot.Tabard;
+                    break;
+                case InventoryType.WeaponMainhand:
+                case InventoryType.TwoHandedWeapon:
+                    itemSlot = (int)InventorySlot.Mainhand;
+                    break;
+                case InventoryType.WeaponOffhand:
+                case InventoryType.Holdable:
+                case InventoryType.Shield:
+                    itemSlot = (int)InventorySlot.Offhand;
+                    break;
+                case InventoryType.Finger:
+                    itemSlot = currentRingSlot++;
+                    break;
+                case InventoryType.Ranged:
+                case InventoryType.Thrown:
+                case InventoryType.RangedRight:
+                    itemSlot = (int)InventorySlot.Ranged;
+                    break;
+                case InventoryType.Relic:
+                    itemSlot = (int)InventorySlot.Ranged;
+                    break;
+                default:
+                    break;
+            }
+
+            if (itemSlot != -1)
+            {
+                ItemInstance item = new()
+                {
+                    Id = 0,
+                    ItemId = (int)itemEntry.ID,
+                    ItemDisplayId = itemEntry.DisplayInfoID
+                };
+
+                CharacterInventory inventoryItem = new()
+                {
+                    InventorySlot = itemSlot,
+                    Character =  characterDbEntry,
+                    Item = item
+                };
+
+                characterDbEntry.Inventory.Add(inventoryItem);
+            }
+        }
     }
 }

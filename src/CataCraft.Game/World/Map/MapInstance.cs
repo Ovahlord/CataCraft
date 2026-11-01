@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using CataCraft.Core.Configuration;
 using CataCraft.DBC.Model;
 using CataCraft.Game.Entities.Object;
-using CataCraft.Game.Entities.Unit.Player;
+using CataCraft.Game.Entities.Object.Unit.Player;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Protocol.Packets.GamePackets;
 
@@ -27,6 +27,7 @@ public class MapInstance
 
     private readonly ConcurrentDictionary<WowGuid, WowObject> _wowObjects = [];
     private readonly ConcurrentDictionary<WowGuid, Player> _playerObjects = [];
+    private readonly ConcurrentDictionary<WowGuidType, int> _entityIdCounters = [];
 
     public MapInstance(MapEntry mapEntry)
     {
@@ -52,6 +53,13 @@ public class MapInstance
 
     public async Task LoadDataAsync()
     {
+    }
+
+    public int GetNextEntityId(WowGuidType wowGuidType)
+    {
+        int counter = _entityIdCounters.GetValueOrDefault(wowGuidType, 1);
+        _entityIdCounters.AddOrUpdate(wowGuidType, counter, (_, oldValue) => oldValue + 1);
+        return counter;
     }
 
     public bool TryGetPlayer(WowGuid playerGuid, [NotNullWhen(true)] out Player? player)

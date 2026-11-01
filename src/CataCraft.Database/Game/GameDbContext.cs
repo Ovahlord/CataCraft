@@ -2,7 +2,7 @@
 
 using CataCraft.Core;
 using CataCraft.Core.Configuration;
-using CataCraft.Database.Game.Model;
+using CataCraft.Database.Game.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Database.Game;

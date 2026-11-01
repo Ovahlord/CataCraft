@@ -3,9 +3,9 @@
 using System.Buffers;
 using CataCraft.Core.Utils;
 using CataCraft.Database.Login;
-using CataCraft.Database.Login.Model;
+using CataCraft.Database.Login.Entities;
 using CataCraft.Database.Realm;
-using CataCraft.Database.Realm.Model;
+using CataCraft.Database.Realm.Entities;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Networking;
 using Microsoft.EntityFrameworkCore;

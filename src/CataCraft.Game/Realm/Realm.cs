@@ -35,7 +35,7 @@ public class Realm
     private readonly TcpListener _securedConnectionListener;
     private CancellationTokenSource _cts = new();
 
-    public Realm(Database.Realm.Model.Realm realmDbEntry)
+    public Realm(Database.Realm.Entities.Realm realmDbEntry)
     {
         EntryIpEndpoint = IPEndPoint.Parse(realmDbEntry.EntryIpEndpoint);
         SecureIpEndpoint = IPEndPoint.Parse(realmDbEntry.SecureIpEndpoint);

@@ -2,17 +2,19 @@
 
 using CataCraft.Core;
 using CataCraft.Core.Configuration;
-using CataCraft.Database.Realm.Model;
+using CataCraft.Database.Realm.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Database.Realm;
 
 public class RealmDbContext : DbContext
 {
-    public DbSet<Model.Realm> Realms { get; set; }
+    public DbSet<Entities.Realm> Realms { get; set; }
     public DbSet<Character> Characters { get; set; }
     public DbSet<CharacterStats> CharacterStats { get; set; }
     public DbSet<CharacterData> CharacterDataEntries { get; set; }
+    public DbSet<CharacterInventory> CharacterItems { get; set; }
+    public DbSet<ItemInstance> ItemInstances { get; set; }
 
     private static readonly string s_connectionString = GetConnectionString();
 

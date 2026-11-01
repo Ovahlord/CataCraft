@@ -5,7 +5,6 @@ using CataCraft.Game.Enums;
 
 namespace CataCraft.Game.Entities.Object
 {
-
     public enum TypeId : byte
     {
         Object = 0,
