@@ -5,7 +5,7 @@ namespace CataCraft.Game.Enums;
 public enum WowGuidType : uint
 {
     Item          = 0x400,
-    Container     = 0x400,
+    Container     = 0x460,
     Player        = 0x000,
     GameObject    = 0xF11,
     Transport     = 0xF12,

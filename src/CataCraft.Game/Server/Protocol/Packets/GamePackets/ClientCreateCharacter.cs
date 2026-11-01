@@ -197,7 +197,7 @@ public struct ClientCreateCharacter
     {
         int currentBackpackSlot = (int)InventorySlot.ItemStart;
         int currentRingSlot = (int)InventorySlot.Finger1;
-        int currentBagSlot = (int)InventorySlot.BagStart;
+        int currentBagSlot = (int)InventorySlot.Bag1;
         int currentWeaponSlot = (int)InventorySlot.Mainhand;
         int currentTrinketSlot = (int)InventorySlot.Trinket1;
 

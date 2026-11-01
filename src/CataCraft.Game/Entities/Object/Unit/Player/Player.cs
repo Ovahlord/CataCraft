@@ -4,6 +4,7 @@ using System.Numerics;
 using CataCraft.Database.Realm.Entities;
 using CataCraft.DBC;
 using CataCraft.DBC.Model;
+using CataCraft.Game.Entities.Object.Item.Container;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Networking;
 
@@ -100,12 +101,24 @@ public sealed class Player : Unit
 
         foreach (CharacterInventory inventoryItem in characterDbData.Inventory)
         {
-            Item.Item item = EntityFactory.CreateItem(inventoryItem.Item.Id);
-            item.Owner = Guid;
-            item.Entry = inventoryItem.Item.ItemId;
+            if (DBCManager.SItemSparseStore.TryGetValue(inventoryItem.Item.ItemId, out ItemSparseEntry? itemSparseEntry))
+            {
+                Item.Item item;
+                if ((InventoryType)itemSparseEntry.InventoryType == InventoryType.Bag)
+                {
+                    Container container = EntityFactory.CreateContainer(inventoryItem.ItemInstanceId);
+                    container.NumSlots = (int)itemSparseEntry.ContainerSlots;
+                    item = container;
+                }
+                else
+                    item = EntityFactory.CreateItem(inventoryItem.ItemInstanceId);
 
-            Inventory.EquipItem(item, (InventorySlot)inventoryItem.InventorySlot);
-            NewObjects.Add(item);
+                item.Owner = Guid;
+                item.Entry = inventoryItem.Item.ItemId;
+
+                Inventory.EquipItem(item, (InventorySlot)inventoryItem.InventorySlot);
+                NewObjects.Add(item);
+            }
         }
 
         // The player can always see himself

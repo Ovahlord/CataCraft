@@ -67,24 +67,22 @@ public static class EntityFactory
         return new Item(guid);
     }
 
-    public static Item CreateItem(int itemId)
+    public static Item CreateItem(int itemInstanceId)
     {
-        WowGuid guid = new(WowGuidType.Item, (uint)itemId);
-        Interlocked.Increment(ref s_itemIdCounter);
+        WowGuid guid = new(WowGuidType.Item, (uint)itemInstanceId);
         return new Item(guid);
     }
 
     public static Container CreateContainer()
     {
-        WowGuid guid = new(WowGuidType.Container, (uint)s_containerIdCounter);
+        WowGuid guid = new(WowGuidType.Item, (uint)s_containerIdCounter);
         Interlocked.Increment(ref s_containerIdCounter);
         return new Container(guid);
     }
 
-    public static Container CreateContainer(int containerId)
+    public static Container CreateContainer(int itemInstanceId)
     {
-        WowGuid guid = new(WowGuidType.Container, (uint)containerId);
-        Interlocked.Increment(ref s_containerIdCounter);
+        WowGuid guid = new(WowGuidType.Container, (uint)itemInstanceId);
         return new Container(guid);
     }
 }

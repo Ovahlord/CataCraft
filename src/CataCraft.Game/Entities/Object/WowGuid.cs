@@ -85,6 +85,8 @@ namespace CataCraft.Game.Entities.Object
                 {
                     case WowGuidType.Item:
                         return WowObjectType.Item;
+                    case WowGuidType.Container:
+                        return WowObjectType.Container;
                     case WowGuidType.Unit:
                     case WowGuidType.Pet:
                     case WowGuidType.Vehicle:

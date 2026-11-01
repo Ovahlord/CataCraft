@@ -6,6 +6,7 @@ using CataCraft.Core.Configuration;
 using CataCraft.DBC.Model;
 using CataCraft.Game.Entities.Object;
 using CataCraft.Game.Entities.Object.Item;
+using CataCraft.Game.Entities.Object.Item.Container;
 using CataCraft.Game.Entities.Object.Unit.Player;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Protocol.Packets.GamePackets;
@@ -160,8 +161,8 @@ public class MapInstance
                     createObjectBits.ThisIsYou = true;
                 }
 
-                if (wowObject is Item)
-                    visibilityFlags |= UpdateFieldVisibilityFlags.ItemOwner;
+                if (wowObject is Item or Container)
+                    visibilityFlags |= UpdateFieldVisibilityFlags.Owner | UpdateFieldVisibilityFlags.ItemOwner;
 
                 if (wowObject.Guid.IsPlayer || wowObject.Guid.IsUnit || wowObject.Guid.IsPet)
                     createObjectBits.MovementUpdate = true;
@@ -176,8 +177,11 @@ public class MapInstance
 
                 if (wowObject.HasDirtyUpdateFields)
                 {
-                    if (wowObject is Item)
-                        visibilityFlags |= UpdateFieldVisibilityFlags.ItemOwner;
+                    if (wowObject == player)
+                        visibilityFlags |= UpdateFieldVisibilityFlags.Private | UpdateFieldVisibilityFlags.UnitAll | UpdateFieldVisibilityFlags.Dynamic;
+
+                    if (wowObject is Item or Container)
+                        visibilityFlags |= UpdateFieldVisibilityFlags.Owner | UpdateFieldVisibilityFlags.ItemOwner;
 
                     updateObject.AddObjectToUpdate(wowObject, visibilityFlags);
                 }

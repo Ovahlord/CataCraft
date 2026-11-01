@@ -5,6 +5,7 @@ using CataCraft.Core.Cryptography;
 using CataCraft.Database;
 using CataCraft.DBC;
 using CataCraft.Game.Entities;
+using CataCraft.Game.Entities.Object;
 using CataCraft.Game.Realm;
 using CataCraft.Game.Server.Networking;
 

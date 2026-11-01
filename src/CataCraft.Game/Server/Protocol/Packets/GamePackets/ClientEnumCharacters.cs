@@ -61,7 +61,7 @@ public ref struct ClientEnumCharacters
                 FirstLogin = character.Stats.FirstLogin
             };
 
-            foreach (CharacterInventory inventory in character.Inventory.Where(i => i.InventorySlot < (int)InventorySlot.BagEnd))
+            foreach (CharacterInventory inventory in character.Inventory.Where(i => i.InventorySlot <= (int)InventorySlot.Bag4))
             {
                 if (DBCManager.SItemStore.TryGetValue(inventory.Item.ItemId, out ItemEntry? item))
                 {

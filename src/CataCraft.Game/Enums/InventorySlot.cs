@@ -24,8 +24,10 @@ public enum InventorySlot
     Ranged = 17,
     Tabard = 18,
 
-    BagStart = 19,
-    BagEnd = 23,
+    Bag1 = 19,
+    Bag2 = 20,
+    Bag3 = 21,
+    Bag4 = 22,
 
     ItemStart = 23,
     ItemsEnd = 39,
@@ -37,5 +39,7 @@ public enum InventorySlot
     BankBagEnd = 74,
 
     BuybackStart = 74,
-    BuybackEnd = 86
+    BuybackEnd = 86,
+
+    BackPack = 255
 }
