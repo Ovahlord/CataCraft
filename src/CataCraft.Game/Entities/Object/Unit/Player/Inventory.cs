@@ -188,6 +188,11 @@ public class Inventory
     {
         _items.TryAdd(slot, item);
         _owner.SetUInt64Value(EPlayerFields.PLAYER_FIELD_INV_SLOT_HEAD, (int)slot, item.Guid);
+        if (slot < InventorySlot.Bag1)
+        {
+            _owner.VisibleItems[slot] = item.Entry;
+            _owner.VisibleItemEnchantments[slot] = 0;
+        }
     }
 
     public Item.Item? RemoveItem(InventorySlot slot)
@@ -195,6 +200,11 @@ public class Inventory
         if (_items.TryRemove(slot, out Item.Item? item))
         {
             _owner.SetUInt64Value(EPlayerFields.PLAYER_FIELD_INV_SLOT_HEAD, (int)slot, 0);
+            if (slot < InventorySlot.Bag1)
+            {
+                _owner.VisibleItems[slot] = 0;
+                _owner.VisibleItemEnchantments[slot] = 0;
+            }
             return item;
         }
 

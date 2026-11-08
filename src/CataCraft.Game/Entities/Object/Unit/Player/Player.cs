@@ -18,6 +18,8 @@ public sealed class Player : Unit
     public List<WowObject> OutOfRangeObjects { get; } = [];
     public List<WowObject> VisibleObjects { get; } = [];
     public Inventory Inventory { get; }
+    public VisibleItemEntry VisibleItems { get; }
+    public VisibleItemEnchantment VisibleItemEnchantments { get; }
 
     #region Update Field Accessors
 
@@ -69,6 +71,8 @@ public sealed class Player : Unit
     {
         ObjectType |= TypeMask.Player;
         Inventory = new Inventory(this);
+        VisibleItems = new VisibleItemEntry(this);
+        VisibleItemEnchantments = new VisibleItemEnchantment(this);
     }
 
     public void InitializeFromData(Character characterDbData)
