@@ -122,7 +122,10 @@ public class Inventory
                     return;
                 }
 
-
+                if (FindAutoEquipmentSlotForItem(item, out InventorySlot equipmentSlot))
+                    SwapItem(slot, packSlot, InventorySlot.BackPack, (byte)equipmentSlot);
+                else
+                    SendInventoryChangeFailure(BagResult.WrongSlot, item);
             }
             else
             {
@@ -142,6 +145,11 @@ public class Inventory
                 SendInventoryChangeFailure(BagResult.WrongSlot, item);
                 return;
             }
+
+            if (FindAutoEquipmentSlotForItem(item, out InventorySlot equipmentSlot))
+                SwapItem(slot, packSlot, InventorySlot.BackPack, (byte)equipmentSlot);
+            else
+                SendInventoryChangeFailure(BagResult.WrongSlot, item);
         }
     }
 
@@ -260,6 +268,31 @@ public class Inventory
     /// <returns>True if no item has been found in the slot, otherwise false</returns>
     public bool IsSlotEmpty(InventorySlot slot)
     {
-        return _items.ContainsKey(slot);
+        return !_items.ContainsKey(slot);
+    }
+
+    public bool FindAutoEquipmentSlotForItem(Item.Item item, out InventorySlot slot)
+    {
+        for (slot = InventorySlot.Head; slot < InventorySlot.ItemStart; ++slot)
+        {
+            // First check if the item qualifies for the slot
+            if (item.CanGoInSlot(slot, false))
+            {
+                // We accept any suitable empty slot right away
+                if (IsSlotEmpty(slot))
+                    return true;
+
+                if (slot == InventorySlot.Finger1 || slot == InventorySlot.Trinket1 || slot == InventorySlot.Mainhand)
+                {
+                    // Try to find an alternative empty slot if the first suitable slot is used already
+                    if (item.CanGoInSlot(slot + 1, false) && IsSlotEmpty(slot + 1))
+                        slot += 1;
+                }
+
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -33,13 +33,13 @@ public class Item : WowObject
         1 << (int)InventorySlot.Tabard, // Tabard
         1 << (int)InventorySlot.Chest, // Robe
         1 << (int)InventorySlot.Mainhand | 1 << (int)InventorySlot.Offhand, // WeaponMainhand
-        1 << (int)InventorySlot.Mainhand | 1 << (int)InventorySlot.Offhand, //WeaponOffhand
-        1 << (int)InventorySlot.Offhand, //Holdable
-        0, //Ammo - No longer used in Cataclysm
-        1 << (int)InventorySlot.Ranged, //Thrown
-        1 << (int)InventorySlot.Ranged, //RangedRight
-        0, //Quiver - No longer used in Cataclysm
-        1 << (int)InventorySlot.Ranged, //Relic
+        1 << (int)InventorySlot.Mainhand | 1 << (int)InventorySlot.Offhand, // WeaponOffhand
+        1 << (int)InventorySlot.Offhand, // Holdable
+        0, // Ammo - No longer used in Cataclysm
+        1 << (int)InventorySlot.Ranged, // Thrown
+        1 << (int)InventorySlot.Ranged, // RangedRight
+        0, // Quiver - No longer used in Cataclysm
+        1 << (int)InventorySlot.Ranged, // Relic
     ];
 
     private readonly ItemSparseEntry? _itemSparseEntry;
