@@ -20,7 +20,7 @@ public sealed class Container : Item
 
     #endregion
 
-    public Container(WowGuid guid) : base(guid, (int)EContainerFields.CONTAINER_END, UpdateFieldConstants.SItemVisibilityFlags)
+    public Container(WowGuid guid, int itemId) : base(guid, itemId, (int)EContainerFields.CONTAINER_END, UpdateFieldConstants.SItemVisibilityFlags)
     {
         ObjectType |= TypeMask.Container;
     }
@@ -45,5 +45,15 @@ public sealed class Container : Item
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Checks if the slot within this container contains any item
+    /// </summary>
+    /// <param name="slot">The slot within the container to check for an item</param>
+    /// <returns>True if no item has been found in the slot, otherwise false</returns>
+    public bool IsSlotEmpty(byte slot)
+    {
+        return _items.ContainsKey(slot);
     }
 }

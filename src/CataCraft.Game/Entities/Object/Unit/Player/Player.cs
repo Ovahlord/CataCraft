@@ -106,12 +106,12 @@ public sealed class Player : Unit
                 Item.Item item;
                 if ((InventoryType)itemSparseEntry.InventoryType == InventoryType.Bag)
                 {
-                    Container container = EntityFactory.CreateContainer(inventoryItem.ItemInstanceId);
+                    Container container = EntityFactory.CreateContainer(inventoryItem.ItemInstanceId, inventoryItem.Item.ItemId);
                     container.NumSlots = (int)itemSparseEntry.ContainerSlots;
                     item = container;
                 }
                 else
-                    item = EntityFactory.CreateItem(inventoryItem.ItemInstanceId);
+                    item = EntityFactory.CreateItem(inventoryItem.ItemInstanceId, inventoryItem.Item.ItemId);
 
                 item.Owner = Guid;
                 item.Entry = inventoryItem.Item.ItemId;

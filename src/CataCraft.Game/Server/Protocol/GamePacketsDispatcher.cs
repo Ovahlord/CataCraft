@@ -33,7 +33,8 @@ public static class GamePacketsDispatcher
             { GameClientOpcodes.CMSG_TUTORIAL_CLEAR, ClientTutorialClear.HandlePacket },
             { GameClientOpcodes.CMSG_TUTORIAL_RESET, ClientTutorialReset.HandlePacket },
             { GameClientOpcodes.CMSG_SWAP_ITEM, ClientSwapItem.HandlePacket },
-            { GameClientOpcodes.CMSG_SWAP_INV_ITEM, ClientSwapInvItem.HandlePacket }
+            { GameClientOpcodes.CMSG_SWAP_INV_ITEM, ClientSwapInvItem.HandlePacket },
+            { GameClientOpcodes.CMSG_AUTOEQUIP_ITEM, ClientAutoEquipItem.HandlePacket }
         }.ToFrozenDictionary();
 
     public static bool TryGetPacketHandler(GameClientOpcodes opcode, [NotNullWhen(true)] out PacketHandler? handler)

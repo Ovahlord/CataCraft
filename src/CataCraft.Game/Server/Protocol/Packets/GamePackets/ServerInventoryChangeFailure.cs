@@ -15,7 +15,7 @@ public ref struct ServerInventoryChangeFailure : IServerPacket
     public int Level { get; set; }
     public int SrcSlot { get; set; }
     public int LimitCategory { get; set; }
-    public WowGuid[] Item { get; set; } = new WowGuid[2];
+    public WowGuid[] Item { get; set; } = [];
     public WowGuid SrcContainer { get; set; }
     public WowGuid DstContainer { get; set; }
 

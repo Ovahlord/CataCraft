@@ -60,29 +60,29 @@ public static class EntityFactory
         return new AreaTrigger(guid);
     }
 
-    public static Item CreateItem()
+    public static Item CreateItem(int itemId)
     {
         WowGuid guid = new(WowGuidType.Item, (uint)s_itemIdCounter);
         Interlocked.Increment(ref s_itemIdCounter);
-        return new Item(guid);
+        return new Item(guid, itemId);
     }
 
-    public static Item CreateItem(int itemInstanceId)
+    public static Item CreateItem(int itemInstanceId, int itemId)
     {
         WowGuid guid = new(WowGuidType.Item, (uint)itemInstanceId);
-        return new Item(guid);
+        return new Item(guid, itemId);
     }
 
-    public static Container CreateContainer()
+    public static Container CreateContainer(int itemId)
     {
         WowGuid guid = new(WowGuidType.Item, (uint)s_containerIdCounter);
         Interlocked.Increment(ref s_containerIdCounter);
-        return new Container(guid);
+        return new Container(guid, itemId);
     }
 
-    public static Container CreateContainer(int itemInstanceId)
+    public static Container CreateContainer(int itemInstanceId, int itemId)
     {
         WowGuid guid = new(WowGuidType.Container, (uint)itemInstanceId);
-        return new Container(guid);
+        return new Container(guid, itemId);
     }
 }
