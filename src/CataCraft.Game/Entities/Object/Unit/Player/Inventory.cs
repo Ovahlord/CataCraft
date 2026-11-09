@@ -26,6 +26,11 @@ public class Inventory
     {
         _items.TryAdd(slot, item);
         _owner.SetUInt64Value(EPlayerFields.PLAYER_FIELD_INV_SLOT_HEAD, (int)slot, item.Guid);
+        if (slot < InventorySlot.Bag1)
+        {
+            _owner.VisibleItems[slot] = item.Entry;
+            _owner.VisibleItemEnchantments[slot] = 0;
+        }
     }
 
     /// <summary>
@@ -220,11 +225,27 @@ public class Inventory
         // The player attempts swap the source item into an inventory slot. Make sure that the item belongs into the slot and meets the criterias
         if (dstContainer == null)
         {
-            InventorySlot inventorySlot = (InventorySlot)dstSlot;
+            InventorySlot destination = (InventorySlot)dstSlot;
 
-            // The player attempts to move the source item into an equipment slot. Check the item requirements like level, class and
-            if (inventorySlot <= InventorySlot.Tabard)
-                return CheckEquipmentSlotRequirements(srcItem, inventorySlot, out bagResult, out itemLevel, out limitCategory);
+            // The player attempts to move the source item into an equipment slot. Check the item requirements like level, class and slot
+            if (destination < InventorySlot.ItemStart)
+            {
+                if (!CheckEquipmentSlotRequirements(srcItem, destination, out bagResult, out itemLevel,
+                        out limitCategory))
+                    return false;
+            }
+        }
+
+        if (srcContainer == null)
+        {
+            InventorySlot source = (InventorySlot)srcSlot;
+
+            // Make sure that the item that we swap places with can also go into the new swap slot (i.e. Ring1 into Ring2 etc)
+            if (source < InventorySlot.ItemStart)
+            {
+                if (dstItem != null && !CheckEquipmentSlotRequirements(dstItem, source, out bagResult, out itemLevel, out limitCategory))
+                    return false;
+            }
         }
 
         return true;
