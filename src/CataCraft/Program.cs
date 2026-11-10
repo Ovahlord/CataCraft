@@ -3,9 +3,9 @@ using System.Net.Sockets;
 using CataCraft.Core.Configuration;
 using CataCraft.Core.Cryptography;
 using CataCraft.Database;
+using CataCraft.Database.Game;
 using CataCraft.DBC;
 using CataCraft.Game.Entities;
-using CataCraft.Game.Entities.Object;
 using CataCraft.Game.Realm;
 using CataCraft.Game.Server.Networking;
 
@@ -38,12 +38,13 @@ public static class Program
                 if (await DatabaseManager.CreateDefaultRealmAsync())
                     Console.WriteLine("Default realm 'CataCraft' has been created");
             }
-
-            await DatabaseManager.ImportGameData();
         }
 
         // Initalize the game entity Id counters
         await EntityFactory.InitializeEntityIdsAsync();
+
+        // Load database caches
+        await GameDbCache.LoadDataAsync();
 
         // Load realms
         await RealmManager.LoadRealmsAsync();

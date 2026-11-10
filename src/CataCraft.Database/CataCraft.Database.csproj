@@ -10,4 +10,10 @@
       <ProjectReference Include="..\CataCraft.Core\CataCraft.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Import\Game\RequiredXpForLevels.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

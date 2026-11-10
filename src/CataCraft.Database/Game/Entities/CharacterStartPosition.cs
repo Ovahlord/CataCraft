@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CataCraft.Database.Game.Entities;
 
 [PrimaryKey(nameof(RaceId), nameof(ClassId))]
-public class CharacterCreationLocation
+public class CharacterStartPosition
 {
     public byte RaceId { get; set; }
     public byte ClassId { get; set; }

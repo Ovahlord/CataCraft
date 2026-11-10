@@ -1,6 +1,8 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
 using System.Numerics;
+using CataCraft.Database.Game;
+using CataCraft.Database.Game.Entities;
 using CataCraft.Database.Realm.Entities;
 using CataCraft.DBC;
 using CataCraft.DBC.Model;
@@ -65,6 +67,30 @@ public sealed class Player : Unit
         set => SetUInt32Value(EPlayerFields.PLAYER_FIELD_MAX_LEVEL, 0, value);
     }
 
+    public int Xp
+    {
+        get => GetInt32Value(EPlayerFields.PLAYER_XP, 0);
+        set => SetInt32Value(EPlayerFields.PLAYER_XP, 0, value);
+    }
+
+    public int NextLevelXp
+    {
+        get => GetInt32Value(EPlayerFields.PLAYER_NEXT_LEVEL_XP, 0);
+        set => SetInt32Value(EPlayerFields.PLAYER_NEXT_LEVEL_XP, 0, value);
+    }
+
+    public int RestStateExperience
+    {
+        get => GetInt32Value(EPlayerFields.PLAYER_REST_STATE_EXPERIENCE, 0);
+        set => SetInt32Value(EPlayerFields.PLAYER_REST_STATE_EXPERIENCE, 0, value);
+    }
+
+    public int WatchedFactionIndex
+    {
+        get => GetInt32Value(EPlayerFields.PLAYER_FIELD_WATCHED_FACTION_INDEX, 0);
+        set => SetInt32Value(EPlayerFields.PLAYER_FIELD_WATCHED_FACTION_INDEX, 0, value);
+    }
+
     #endregion // Update Field accessors
 
     public Player(WowGuid guid) : base(guid, (int)EPlayerFields.PLAYER_END, UpdateFieldConstants.SPlayerVisibilityFlags)
@@ -87,7 +113,13 @@ public sealed class Player : Unit
         HairStyleId = characterDbData.HairStyleId;
         HairColorId = characterDbData.HairColorId;
         FacialHairStyleId = characterDbData.FacialHairStyleId;
+
         Level = characterDbData.Stats.ExperienceLevel;
+        Xp = characterDbData.Stats.Experience;
+        RestStateExperience = 0;
+        if (GameDbCache.RequiredXpForLevels.TryGetValue(Level, out RequiredXpForLevel? requiredXpForLevel))
+            NextLevelXp = requiredXpForLevel.RequiredXp;
+
         MaxLevel = 85;
         Race = (ChrRace)characterDbData.RaceId;
         Class = (ChrClass)characterDbData.ClassId;
@@ -98,8 +130,8 @@ public sealed class Player : Unit
         BoundingRadius = 1f;
         CombatReach = 1f;
         HoverHeight = 1f;
+        WatchedFactionIndex = -1;
 
-        SetInt32Value(EPlayerFields.PLAYER_FIELD_WATCHED_FACTION_INDEX, 0, -1);
         MovementStatus.Position = new Vector3(characterDbData.Stats.PositionX, characterDbData.Stats.PositionY, characterDbData.Stats.PositionZ);
         MovementStatus.Facing = characterDbData.Stats.Facing;
 

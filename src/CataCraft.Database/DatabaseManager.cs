@@ -82,16 +82,4 @@ public static class DatabaseManager
 
         return true;
     }
-
-    public static async Task ImportGameData()
-    {
-        try
-        {
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-    }
-
 }

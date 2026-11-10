@@ -1,6 +1,5 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
-using CataCraft.Core;
 using CataCraft.Core.Configuration;
 using CataCraft.Database.Realm.Entities;
 using Microsoft.EntityFrameworkCore;
