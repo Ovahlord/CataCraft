@@ -487,7 +487,7 @@ indent_brace_style = Allman
 
 # Xml project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,nativeproj,locproj}]
-indent_size = 2
+indent_size = 4
 
 # WiX files
 [*.{wixproj,wxs,wxi,wxl,thm}]
@@ -502,11 +502,11 @@ indent_size = 2
 
 # Xml files
 [*.{xml,stylecop,resx,ruleset}]
-indent_size = 2
+indent_size = 4
 
 # Xml config files
 [*.{props,targets,config,nuspec}]
-indent_size = 2
+indent_size = 4
 
 # YAML config files
 [*.{yml,yaml}]
