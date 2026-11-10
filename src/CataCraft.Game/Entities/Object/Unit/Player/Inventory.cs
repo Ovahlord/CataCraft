@@ -92,7 +92,7 @@ public class Inventory
         if (destContainer != null)
             destContainer.RemoveItem(slotB);
         else
-            RemoveItem((InventorySlot)slotA);
+            RemoveItem((InventorySlot)slotB);
 
         // Store the flipped items
         if (destItem != null)
