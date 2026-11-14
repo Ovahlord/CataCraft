@@ -19,6 +19,7 @@ public sealed class GameDbContext : DbContext
         optionsBuilder.UseSqlite($"Data Source={s_connectionString}")
             .UseAsyncSeeding(async (context, _, cancellationToken) =>
             {
+                await ImportJsonTableAsync<CharacterStartPosition>(context, nameof(CharacterStartPositions), cancellationToken);
                 await ImportJsonTableAsync<RequiredXpForLevel>(context, nameof(RequiredXpForLevels), cancellationToken);
             });
     }

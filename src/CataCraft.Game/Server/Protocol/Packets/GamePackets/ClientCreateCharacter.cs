@@ -1,6 +1,8 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
 using System.Buffers;
+using CataCraft.Database.Game;
+using CataCraft.Database.Game.Entities;
 using CataCraft.Database.Realm;
 using CataCraft.Database.Realm.Entities;
 using CataCraft.DBC;
@@ -26,42 +28,6 @@ public struct ClientCreateCharacter
 
     private const int MaxCharactersPerRealm   = 10;
     private const int MaxCharactersPerAccount = 50;
-
-    private class CharacterCreationPositionData
-    {
-        public CharacterCreationPositionData(int mapId, float positionX, float positionY, float positionZ, float facing)
-        {
-            MapId = mapId;
-            PositionX = positionX;
-            PositionY = positionY;
-            PositionZ = positionZ;
-            Facing = facing;
-        }
-
-        public int MapId { get; set; }
-        public float PositionX { get; set; }
-        public float PositionY { get; set; }
-        public float PositionZ { get; set; }
-        public float Facing { get; set; }
-    }
-
-    private static readonly Dictionary<ChrRace, CharacterCreationPositionData> s_creationPositionData = new()
-    {
-        { ChrRace.Human, new CharacterCreationPositionData(0, -8914.57f, -133.909f, 80.5378f, 5.13806f) },
-        { ChrRace.Orc, new CharacterCreationPositionData(1, -618.518f, -4251.67f, 38.718f, 4.72222f) },
-        { ChrRace.Dwarf, new CharacterCreationPositionData(0, -6240.32f, 331.033f, 382.758f, 6.17716f) },
-        { ChrRace.Nightelf, new CharacterCreationPositionData(1, 10311.3f, 832.463f, 1326.41f, 5.69632f) },
-        { ChrRace.Undead, new CharacterCreationPositionData(0, 1699.85f, 1706.56f, 135.928f, 4.88839f) },
-        { ChrRace.Tauren, new CharacterCreationPositionData(1, -2915.55f, -257.347f, 59.2693f, 0.302378f) },
-        { ChrRace.Gnome, new CharacterCreationPositionData(0, -4983.42f, 877.7f, 274.31f, 3.06393f) },
-        { ChrRace.Troll, new CharacterCreationPositionData(1, -1171.45f, -5263.65f, 0.847728f, 5.78945f) },
-        { ChrRace.Goblin, new CharacterCreationPositionData(648, -8423.81f, 1361.3f, 104.671f, 1.55428f) },
-        { ChrRace.Bloodelf, new CharacterCreationPositionData(530, 10349.6f, -6357.29f, 33.4026f, 5.31605f) },
-        { ChrRace.Draenei, new CharacterCreationPositionData(530, -3961.64f, -13931.2f, 100.615f, 2.08364f) },
-        { ChrRace.Worgen, new CharacterCreationPositionData(654, -1451.53f, 1403.35f, 35.5561f, 0.333847f) }
-    };
-
-    private static readonly CharacterCreationPositionData s_deathKnightCreationPositionData = new(609, 2355.84f, -5664.77f, 426.028f, 3.93485f);
 
     private ClientCreateCharacter(in ReadOnlySequence<byte> payload)
     {
@@ -91,10 +57,10 @@ public struct ClientCreateCharacter
         }
 
         // Determine the starting location
-        CharacterCreationPositionData? positionData;
-        if ((ChrClass)createCharacter.ClassID == ChrClass.DeathKnight)
-            positionData = s_deathKnightCreationPositionData;
-        else if (!s_creationPositionData.TryGetValue((ChrRace)createCharacter.RaceID, out positionData))
+        CharacterStartPosition? startPosition = GameDbCache.CharacterStartPositions
+            .FirstOrDefault(p => p.ClassId == createCharacter.ClassID && p.RaceId == createCharacter.RaceID);
+
+        if (startPosition == null)
         {
             SendCharCreateResponse(ResponseCodes.CharCreateError, session);
             return;
@@ -139,11 +105,11 @@ public struct ClientCreateCharacter
         // Prepare the database entries
         CharacterStats characterStats = new()
         {
-            MapId = positionData.MapId,
-            PositionX = positionData.PositionX,
-            PositionY = positionData.PositionY,
-            PositionZ = positionData.PositionZ,
-            Facing = positionData.Facing
+            MapId = startPosition.MapId,
+            PositionX = startPosition.PositionX,
+            PositionY = startPosition.PositionY,
+            PositionZ = startPosition.PositionZ,
+            Facing = startPosition.Facing
         };
 
         Character character = new()
