@@ -7,7 +7,7 @@ ___
 
 **Technologies used**
 
-- C# and .NET 10 (We will always update to the latest .NET version when available)
+- C# and .NET 11 (We will always update to the latest .NET version when available)
 - Entity Framework Core for database management
 - BouncyCastle for RSA SHA 1 specific cryptographic use cases
 
