@@ -1,9 +1,11 @@
 // This file is part of the CataCraft project, which is published under the MIT license.
 
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Database.Realm.Entities;
 
+[PrimaryKey(nameof(Id))]
 public class Realm
 {
     public byte Id { get; set; }

@@ -19,8 +19,11 @@ public sealed class GameDbContext : DbContext
         optionsBuilder.UseSqlite($"Data Source={s_connectionString}")
             .UseAsyncSeeding(async (context, _, cancellationToken) =>
             {
-                await ImportJsonTableAsync<CharacterStartPosition>(context, nameof(CharacterStartPositions), cancellationToken);
-                await ImportJsonTableAsync<RequiredXpForLevel>(context, nameof(RequiredXpForLevels), cancellationToken);
+                if (!AppSettings.TryGetConfigValue("GameDataImportPath", out string? importDataPath))
+                    return;
+
+                await context.ImportJsonTableAsync<CharacterStartPosition>(nameof(CharacterStartPositions), importDataPath, cancellationToken);
+                await context.ImportJsonTableAsync<RequiredXpForLevel>(nameof(RequiredXpForLevels), importDataPath, cancellationToken);
             });
     }
 
@@ -30,36 +33,5 @@ public sealed class GameDbContext : DbContext
             return connectionString;
 
         return string.Empty;
-    }
-
-    private static async Task ImportJsonTableAsync<TEntity>(DbContext context, string tableName, CancellationToken cancellationToken) where TEntity : class
-    {
-        try
-        {
-            // First we check if the table has any data in it already - if yes, we don't want to import any default data
-            if (await context.Set<TEntity>().AnyAsync(cancellationToken))
-                return;
-
-            if (!AppSettings.TryGetConfigValue("GameDataImportPath", out string? importDataPath))
-                return;
-
-            string importFilePath = Path.Combine(importDataPath, $"{tableName}.json");
-            if (!File.Exists(importFilePath))
-                return;
-
-            Console.WriteLine($"Importing Json file: {Path.GetFileName(importFilePath)}");
-
-            await using FileStream fs = File.OpenRead(importFilePath);
-            List<TEntity>? result = await JsonSerializer.DeserializeAsync<List<TEntity>>(fs, cancellationToken: cancellationToken);
-            if (result != null)
-            {
-                await  context.Set<TEntity>().AddRangeAsync(result, cancellationToken);
-                await context.SaveChangesAsync(cancellationToken);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
     }
 }

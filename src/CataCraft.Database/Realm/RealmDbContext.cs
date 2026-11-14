@@ -19,7 +19,13 @@ public class RealmDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite($"Data Source={s_connectionString}");
+        optionsBuilder.UseSqlite($"Data Source={s_connectionString}").UseAsyncSeeding(async (context, _, cancellationToken) =>
+        {
+            if (!AppSettings.TryGetConfigValue("RealmDataImportPath", out string? importDataPath))
+                return;
+
+            await context.ImportJsonTableAsync<Entities.Realm>(nameof(Realms), importDataPath, cancellationToken);
+        });
     }
 
     private static string GetConnectionString()

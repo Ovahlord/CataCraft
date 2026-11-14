@@ -63,23 +63,4 @@ public static class DatabaseManager
 
         return true;
     }
-
-    public static async Task<bool> CreateDefaultRealmAsync()
-    {
-        try
-        {
-            await using RealmDbContext realmDb = new();
-            Realm.Entities.Realm realm = new() { RealmName = "CataCraft", };
-
-            realmDb.Realms.Add(realm);
-            await realmDb.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return false;
-        }
-
-        return true;
-    }
 }

@@ -32,12 +32,6 @@ public static class Program
                 if (await DatabaseManager.CreateGameAccountAsync("ADMIN", "admin@admin", salt, verifier))
                     Console.WriteLine("Created admin GameAccount - user: admin || pass: admin");
             }
-
-            if (AppSettings.TryGetConfigValue("CreateDefaultRealm", out create) && create)
-            {
-                if (await DatabaseManager.CreateDefaultRealmAsync())
-                    Console.WriteLine("Default realm 'CataCraft' has been created");
-            }
         }
 
         // Initalize the game entity Id counters

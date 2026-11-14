@@ -1,0 +1,14 @@
+[
+  {
+    "Id": 0,
+    "RealmName": "CataCraft",
+    "RealmType": 0,
+    "RealmCategory": 1,
+    "RecommendedForNewPlayers": false,
+    "LockedForNewPlayers": false,
+    "MaxPlayers": 1000,
+    "AllowedBuild": 15595,
+    "EntryIpEndpoint": "127.0.0.1:8086",
+    "SecureIpEndpoint": "127.0.0.1:8087"
+  }
+]
