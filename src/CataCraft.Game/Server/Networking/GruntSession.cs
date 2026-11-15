@@ -8,13 +8,15 @@ using CataCraft.Database.Login;
 using CataCraft.Database.Login.Entities;
 using CataCraft.Game.Enums;
 using CataCraft.Game.Server.Protocol;
+using CataCraft.Game.Server.Protocol.Packets.GruntPackets;
 using Microsoft.EntityFrameworkCore;
 
 namespace CataCraft.Game.Server.Networking;
 
 public sealed class GruntSession : WowSession
 {
-    protected override int ClientPacketHeaderSize => 1;
+    // The first grunt packet contains a CSring so it sends its initial payload size and protocol version upfront in its header
+    protected override int ClientPacketHeaderSize => GruntAuthenticationState == GruntAuthenticationState.LogonChallenge ? ClientAuthLogonChallenge.HeaderSize : 1;
     protected override int ServerPacketHeaderSize => 1;
 
     public SRP6? SRP6 { get; private set; }
@@ -32,14 +34,29 @@ public sealed class GruntSession : WowSession
         payloadLength = 0;
 
         SequenceReader<byte> reader = new(headerBuffer);
-        if (!reader.TryRead(out byte byteOpcode))
+        if (!reader.TryRead(out byte byteOpcode) || !Enum.IsDefined(typeof(GruntOpcodes), (GruntOpcodes)byteOpcode))
             return false;
 
-        payloadLength = -1;
         opcode = byteOpcode;
 
-        if (!Enum.IsDefined(typeof(GruntOpcodes), (GruntOpcodes)byteOpcode))
-            return false;
+        switch (GruntAuthenticationState)
+        {
+            case GruntAuthenticationState.LogonChallenge:
+                // The Auth Logon Challenge contains a CString and a protocol version so the payload size varies based on user input
+                if (!reader.TryRead(out byte protocolVersion) || protocolVersion != ClientAuthLogonChallenge.GruntProtocolVersion)
+                    return false;
+
+                if (!reader.TryReadLittleEndian(out short payloadSize) || payloadSize <= 0 || payloadSize > ClientAuthLogonChallenge.MaxPayloadSize)
+                    return false;
+
+                payloadLength = payloadSize;
+                break;
+            case GruntAuthenticationState.LogonProof:
+                payloadLength = ClientAuthLogonProof.PayloadSize;
+                break;
+            default:
+                break;
+        }
 
         Console.WriteLine($"Received packet with opcode ({(GruntOpcodes)opcode}) 0x{opcode:x2} and payload length {payloadLength}");
 

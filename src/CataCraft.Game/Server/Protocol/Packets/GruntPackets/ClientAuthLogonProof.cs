@@ -13,6 +13,8 @@ namespace CataCraft.Game.Server.Protocol.Packets.GruntPackets;
 
 public ref struct ClientAuthLogonProof
 {
+    public const int PayloadSize = 74; // Telemetry Keys are never used so if we should get some, we assume malformed packets or hacking attempts
+
     public byte[] A { get; private set; }
     public byte[] ClientM { get; private set; }
     public byte[] CrcHash { get; private set; }
